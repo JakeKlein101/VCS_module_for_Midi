@@ -1,4 +1,15 @@
+import os
+
 from mido import MidiFile
+
+
+def mash_up(first_track, second_track):
+    del first_track.tracks[4]
+
+    first_track.tracks.append(second_track.tracks[4])
+    first_track.tracks.append(second_track.tracks[5])
+
+    first_track.save('mashup.mid')
 
 
 def show_track_messages(track):
