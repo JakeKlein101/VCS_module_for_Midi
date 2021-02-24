@@ -1,4 +1,3 @@
-import os
 from mido import MidiFile
 
 
@@ -24,8 +23,8 @@ def show_tracks(mid):
 
 def main():
     mid = MidiFile("untitled.mid", clip=True)  # clip=True normalizes all note velocities above 127 to 127.
-    print(mid)
-    # show_tracks(mid)
+    # print(mid)
+    show_tracks(mid)
     show_track_messages(mid.tracks[1])
 
 
