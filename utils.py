@@ -24,7 +24,7 @@ def handle_init(path):
         # TODO: Fix, the path is the path of the file not the cmd.
         print(joined_path)
 
-    if os.path.exists(joined_path):
+    if not os.path.exists(joined_path):
         os.mkdir(joined_path)
         ctypes.windll.kernel32.SetFileAttributesW(joined_path, FILE_ATTRIBUTE_HIDDEN)
     else:
