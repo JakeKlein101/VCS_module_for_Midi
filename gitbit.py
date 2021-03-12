@@ -13,8 +13,9 @@ def main():
     if args.opcode == "commit":
         utils.handle_commit(args.opcode_args)
     elif args.opcode == "init":
-        print(args.opcode_args)
         utils.handle_init(args.opcode_args)
+    elif args.opcode == "end_repo":
+        utils.handle_end_repo(args.opcode_args)
 
 
 if __name__ == '__main__':
