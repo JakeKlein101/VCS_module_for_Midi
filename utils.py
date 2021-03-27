@@ -1,7 +1,7 @@
 import os
 import ctypes
 import json
-
+import diff_module
 
 # consts:
 
@@ -26,14 +26,15 @@ def conf_parse():
 # Argument handlers:
 
 
-def handle_commit(commit_message):  # TODO: Research and find a way to make reversable commits.
+def handle_commit(commit_message):
     conf_parse()
     global REPO_PATH
-    if not os.path.exists(REPO_PATH):
+    if os.path.exists(REPO_PATH):
+        print("Commit message: ", commit_message)
+        # TODO: enter the current and previous file into the commit system and make comparisons.
+    else:
         print("repo path" + REPO_PATH)
         print("No repository found.")
-    else:
-        print("Commit message: ", commit_message)  # create file that contains the metadata for commits
 
 
 def handle_init():
