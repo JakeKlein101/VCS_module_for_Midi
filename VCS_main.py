@@ -10,6 +10,16 @@ COMMIT = 0
 
 
 # Utility functions:
+def find_mid_files():
+    """
+    Searches for all the .mid files in the current working directory and returns a list of them.
+    """
+    ret_dict = []
+    for file in os.listdir(os.getcwd()):
+        if file.endswith(".mid"):
+            ret_dict.append(file.title())
+    return ret_dict
+
 
 def conf_parse():
     """
@@ -53,7 +63,6 @@ def delete_fifth_last():
     global REPO_PATH
 
     path_to_delete = os.path.join(REPO_PATH, "commit " + str(COMMIT - 5))
-    print(path_to_delete)
     os.rmdir(path_to_delete)
 
 # Argument handlers:
@@ -73,7 +82,7 @@ def handle_commit(commit_message):
 
         os.mkdir(os.path.join(REPO_PATH, "commit " + str(COMMIT)))
         COMMIT += 1
-        conf_update()
+        conf_update()  # Updates the configuration file with changes.
     else:
         print("repo path" + REPO_PATH)
         print("No repository found.")
@@ -92,12 +101,9 @@ def handle_init():
 
         conf_json["repo_path"] = REPO_PATH
         conf_json["commit_count"] = COMMIT
+        conf_json["versioned_file_names"] = find_mid_files()
 
         with open(os.path.join(REPO_PATH, "conf.json"), "w") as conf_file:
             json.dump(conf_json, conf_file)
     else:
         print("There is already a repository in this working directory.")
-
-
-
-

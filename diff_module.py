@@ -1,3 +1,4 @@
+from mido import MidiFile
 import MidiMethods
 
 

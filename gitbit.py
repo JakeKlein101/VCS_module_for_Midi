@@ -1,4 +1,4 @@
-import utils
+import VCS_main
 import argparse
 import sys
 
@@ -13,9 +13,10 @@ parser.add_argument("-o", "--opcode_args", type=str, help="Optional arguments fo
 def main():
     args = parser.parse_args()
     if args.opcode == "commit":
-        utils.handle_commit(args.opcode_args)
+        VCS_main.handle_commit(args.opcode_args)
     elif args.opcode == "init":
-        utils.handle_init()
+        VCS_main.handle_init()
+    # TODO: Add rollback command.
 
 
 if __name__ == '__main__':
