@@ -1,6 +1,7 @@
 import os
 import ctypes
 import json
+import shutil
 
 # consts:
 
@@ -33,7 +34,6 @@ def conf_parse():
         conf_content = json.load(conf_file)
         REPO_PATH = conf_content["repo_path"]
         COMMIT = conf_content["commit_count"]
-        print("commit:", COMMIT)
 
 
 def conf_update():
@@ -107,3 +107,11 @@ def handle_init():
             json.dump(conf_json, conf_file)
     else:
         print("There is already a repository in this working directory.")
+
+
+def handle_delete():
+    conf_parse()
+    global REPO_PATH
+    if input("Are you sure you want to delete the repository? y/n: ") == "y":
+        shutil.rmtree(REPO_PATH)
+

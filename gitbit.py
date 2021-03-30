@@ -16,6 +16,8 @@ def main():
         VCS_main.handle_commit(args.opcode_args)
     elif args.opcode == "init":
         VCS_main.handle_init()
+    elif args.opcode == "delete":
+        VCS_main.handle_delete()
     # TODO: Add rollback command.
 
 
