@@ -8,17 +8,32 @@ import shutil
 FILE_ATTRIBUTE_HIDDEN = 0x02
 REPO_PATH = ""
 COMMIT = 0
+VERSIONED_FILE_NAMES = []
 
 
 # Utility functions:
-def find_mid_files():
+
+def copy_midi_file_to_commit_dir():
+    """
+    Iterates through all the .mid files that were detected and copies the current instances to the commit folder.
+    """
+    global REPO_PATH
+    global COMMIT
+    global VERSIONED_FILE_NAMES
+
+    for file_name in VERSIONED_FILE_NAMES:
+        shutil.copyfile(os.path.join(os.getcwd(), file_name),
+                        os.path.join(REPO_PATH, "commit " + str(COMMIT), file_name))
+
+
+def find_midi_files():
     """
     Searches for all the .mid files in the current working directory and returns a list of them.
     """
     ret_dict = []
     for file in os.listdir(os.getcwd()):
         if file.endswith(".mid"):
-            ret_dict.append(file.title())
+            ret_dict.append(file)
     return ret_dict
 
 
@@ -29,11 +44,13 @@ def conf_parse():
     """
     global REPO_PATH
     global COMMIT
+    global VERSIONED_FILE_NAMES
 
     with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
         conf_content = json.load(conf_file)
         REPO_PATH = conf_content["repo_path"]
         COMMIT = conf_content["commit_count"]
+        VERSIONED_FILE_NAMES = conf_content["versioned_file_names"]
 
 
 def conf_update():
@@ -73,18 +90,17 @@ def handle_commit(commit_message):
     global REPO_PATH
     global COMMIT
 
+    # TODO: enter the current and previous file into the commit system and make comparisons.
     if os.path.exists(REPO_PATH):
-        # TODO: enter the current and previous file into the commit system and make comparisons.
-
         print("Commit message: ", commit_message)
         if COMMIT >= 5:
             delete_fifth_last()
 
         os.mkdir(os.path.join(REPO_PATH, "commit " + str(COMMIT)))
+        copy_midi_file_to_commit_dir()
         COMMIT += 1
         conf_update()  # Updates the configuration file with changes.
     else:
-        print("repo path" + REPO_PATH)
         print("No repository found.")
 
 
@@ -97,11 +113,11 @@ def handle_init():
 
     if not os.path.exists(REPO_PATH):
         os.mkdir(REPO_PATH)
-        ctypes.windll.kernel32.SetFileAttributesW(REPO_PATH, FILE_ATTRIBUTE_HIDDEN)
+        ctypes.windll.kernel32.SetFileAttributesW(REPO_PATH, FILE_ATTRIBUTE_HIDDEN)  # Creates a hidden directory.
 
         conf_json["repo_path"] = REPO_PATH
         conf_json["commit_count"] = COMMIT
-        conf_json["versioned_file_names"] = find_mid_files()
+        conf_json["versioned_file_names"] = find_midi_files()
 
         with open(os.path.join(REPO_PATH, "conf.json"), "w") as conf_file:
             json.dump(conf_json, conf_file)
