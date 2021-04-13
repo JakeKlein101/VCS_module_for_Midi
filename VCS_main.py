@@ -2,6 +2,7 @@ import os
 import ctypes
 import json
 import shutil
+import diff_module
 
 # consts:
 
@@ -12,6 +13,24 @@ VERSIONED_FILE_NAMES = []
 
 
 # Utility functions:
+
+def get_paths_of_files_to_compare():
+    """
+    gets the paths to the latest commited file and the second to last commited file.
+    :return: returns both paths.
+    :rtype: str, str
+    """
+    global REPO_PATH
+    global COMMIT
+    global VERSIONED_FILE_NAMES
+
+    latest_file_path = os.path.join(REPO_PATH, "commit " + str(COMMIT), VERSIONED_FILE_NAMES[0])
+    second_to_last_file_path = os.path.join(REPO_PATH, "commit " + str(COMMIT - 1), VERSIONED_FILE_NAMES[0])
+    print(latest_file_path)
+    print(second_to_last_file_path)
+
+    return latest_file_path, second_to_last_file_path
+
 
 def copy_midi_file_to_commit_dir():
     """
@@ -29,12 +48,13 @@ def copy_midi_file_to_commit_dir():
 def find_midi_files():
     """
     Searches for all the .mid files in the current working directory and returns a list of them.
+    :rtype: list
     """
-    ret_dict = []
+    ret_list = []
     for file in os.listdir(os.getcwd()):
         if file.endswith(".mid"):
-            ret_dict.append(file)
-    return ret_dict
+            ret_list.append(file)
+    return ret_list
 
 
 def conf_parse():
@@ -80,7 +100,7 @@ def delete_fifth_last():
     global REPO_PATH
 
     path_to_delete = os.path.join(REPO_PATH, "commit " + str(COMMIT - 5))
-    os.rmdir(path_to_delete)
+    shutil.rmtree(path_to_delete)
 
 # Argument handlers:
 
@@ -90,7 +110,6 @@ def handle_commit(commit_message):
     global REPO_PATH
     global COMMIT
 
-    # TODO: enter the current and previous file into the commit system and make comparisons.
     if os.path.exists(REPO_PATH):
         print("Commit message: ", commit_message)
         if COMMIT >= 5:
@@ -98,6 +117,11 @@ def handle_commit(commit_message):
 
         os.mkdir(os.path.join(REPO_PATH, "commit " + str(COMMIT)))
         copy_midi_file_to_commit_dir()
+
+        if COMMIT > 0:  # The files will only be sent to be checked for diff after more than 1 commit.
+            latest_file_path, second_to_last_file_path = get_paths_of_files_to_compare()
+            diff_module.send_to_diff(latest_file_path, second_to_last_file_path)
+
         COMMIT += 1
         conf_update()  # Updates the configuration file with changes.
     else:
@@ -128,6 +152,12 @@ def handle_init():
 def handle_delete():
     conf_parse()
     global REPO_PATH
-    if input("Are you sure you want to delete the repository? y/n: ") == "y":
+
+    user_input = input("Are you sure you want to delete the repository? y/n: ")
+    if user_input == "y":
         shutil.rmtree(REPO_PATH)
+    elif user_input == "n":
+        print("Regret isnt always a bad thing :)")
+    elif user_input != "y" or user_input != "n":
+        print("Enter a valid letter.")
 

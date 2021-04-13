@@ -1,6 +1,5 @@
 import VCS_main
 import argparse
-import sys
 
 parser = argparse.ArgumentParser(description="Parser for gitbit VCS commands.")
 parser.add_argument("opcode", type=str, help="Choose an opcode that suits the wanted operation."
