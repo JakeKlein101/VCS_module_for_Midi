@@ -26,8 +26,6 @@ def get_paths_of_files_to_compare():
 
     latest_file_path = os.path.join(REPO_PATH, "commit " + str(COMMIT), VERSIONED_FILE_NAMES[0])
     second_to_last_file_path = os.path.join(REPO_PATH, "commit " + str(COMMIT - 1), VERSIONED_FILE_NAMES[0])
-    print(latest_file_path)
-    print(second_to_last_file_path)
 
     return latest_file_path, second_to_last_file_path
 
@@ -120,7 +118,11 @@ def handle_commit(commit_message):
 
         if COMMIT > 0:  # The files will only be sent to be checked for diff after more than 1 commit.
             latest_file_path, second_to_last_file_path = get_paths_of_files_to_compare()
-            diff_module.send_to_diff(latest_file_path, second_to_last_file_path)
+            return_code = diff_module.main_diff(latest_file_path, second_to_last_file_path)
+            if return_code == 0:
+                shutil.rmtree(os.path.join(REPO_PATH, "commit " + str(COMMIT)))
+            elif return_code == 1:
+                print("Committed succesfully.")
 
         COMMIT += 1
         conf_update()  # Updates the configuration file with changes.
