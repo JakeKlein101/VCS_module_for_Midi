@@ -1,6 +1,9 @@
 from mido import MidiFile
 import filecmp
+import os
 
+
+# Utility methods:
 
 def file_paths_to_midi_objects(latest_file_path, second_to_last_file_path):
     """
@@ -13,7 +16,20 @@ def file_paths_to_midi_objects(latest_file_path, second_to_last_file_path):
     return latest_file, second_to_last_file
 
 
-def main_diff(latest_file_path, second_to_last_file_path):  # TODO: finish the method fully.
+def log_diffs_to_file(latest_file_path, latest_file_ms, second_to_last_file_ms, message_index):
+    """
+    Logs the different messages that were found between the MIDI files that were compared to a changes.gitbit file.
+    The file contains the message index, followed by the new version of the message
+     that is followed by the message from the second to latest commit.
+    """
+    with open(os.path.join(os.path.dirname(latest_file_path), "changes.gitbit"), "a") as changes_log_file:
+        changes_log_file.write(str(message_index) + ": " + str(latest_file_ms)
+                               + "\n" + str(second_to_last_file_ms) + "\n")
+
+
+# Main method:
+
+def main_diff(latest_file_path, second_to_last_file_path):  # TODO: check all edge cases.
     if filecmp.cmp(latest_file_path, second_to_last_file_path):
         print("No changes were made.")
         return 0
@@ -26,14 +42,18 @@ def main_diff(latest_file_path, second_to_last_file_path):  # TODO: finish the m
             continue
         else:
             # Iterates and compares each message over unequal tracks, prints True over equals and false over diffs.
-            for latest_file_ms, second_to_last_file_ms in zip(latest_file_track, second_to_last_file_track):
-                # TODO: Make a counter so the logged lines will be numbered.
-                print("Latest: " + str(latest_file_ms) + " Second Latest: " + str(second_to_last_file_ms))
-                if latest_file_ms == second_to_last_file_ms:
-                    print(True)
-                else:
+            # TODO: Add the track index to the log file.
+            for message_index, packed_args in enumerate(zip(latest_file_track, second_to_last_file_track)):
+                latest_file_ms, second_to_last_file_ms = packed_args
+                print(str(message_index) + " Latest: " + str(latest_file_ms)
+                      + " Second Latest: " + str(second_to_last_file_ms))
+                if latest_file_ms != second_to_last_file_ms:
+                    log_diffs_to_file(latest_file_path, latest_file_ms, second_to_last_file_ms, message_index)
                     print(False)
+                else:
+                    print(True)
 
 
 main_diff("modified.mid", "origin.mid")  # For testing
+
 
