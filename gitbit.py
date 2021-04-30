@@ -17,6 +17,8 @@ def main():
         VCS_main.handle_init()
     elif args.opcode == "delete":
         VCS_main.handle_delete()
+    elif args.opcode == "push":
+        VCS_main.handle_push()
     # TODO: Add rollback command.
 
 

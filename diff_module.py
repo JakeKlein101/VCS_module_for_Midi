@@ -57,6 +57,9 @@ def main_diff(latest_file_path, second_to_last_file_path):  # TODO: check all ed
                     print(True)
 
 
-main_diff("modified.mid", "origin.mid")  # For testing
+def main():
+    main_diff("modified.mid", "origin.mid")  # For testing
 
 
+if __name__ == '__main__':
+    main()

@@ -3,6 +3,7 @@ import ctypes
 import json
 import shutil
 import diff_module
+import client_class
 
 # consts:
 
@@ -10,6 +11,7 @@ FILE_ATTRIBUTE_HIDDEN = 0x02
 REPO_PATH = ""
 COMMIT = 0
 VERSIONED_FILE_NAMES = []
+REMOTE_AUTH = None
 
 
 # Utility functions:
@@ -55,41 +57,6 @@ def find_midi_files():
     return ret_list
 
 
-def conf_parse():
-    """
-    Used on all occasitons except init. Used to open the configuration file and set up the needed data
-    about the repository.
-    """
-    global REPO_PATH
-    global COMMIT
-    global VERSIONED_FILE_NAMES
-
-    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
-        conf_content = json.load(conf_file)
-        REPO_PATH = conf_content["repo_path"]
-        COMMIT = conf_content["commit_count"]
-        VERSIONED_FILE_NAMES = conf_content["versioned_file_names"]
-
-
-def conf_update():
-    """
-    Used on all occasions except init.
-    Serves as a closing function to "conf_parse".
-    It updates the configuration file with the changes that have been made when the program was executed.
-    """
-    global REPO_PATH
-    global COMMIT
-
-    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
-        conf_content = json.load(conf_file)
-
-        # The changes to the configuration file are done here:
-        conf_content["commit_count"] += 1
-
-    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "w") as conf_file:
-        json.dump(conf_content, conf_file)
-
-
 def delete_fifth_last():
     """
     Used to keep commit amount managable. It always keeps the latest 5 commits in the repository for rollback options.
@@ -100,8 +67,56 @@ def delete_fifth_last():
     path_to_delete = os.path.join(REPO_PATH, "commit " + str(COMMIT - 5))
     shutil.rmtree(path_to_delete)
 
-# Argument handlers:
 
+# Configuration file modfication methods:
+
+def conf_parse():
+    """
+    Used on all occasitons except init. Used to open the configuration file and set up the needed data
+    about the repository.
+    """
+    global REPO_PATH
+    global COMMIT
+    global VERSIONED_FILE_NAMES
+    global REMOTE_AUTH
+
+    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
+        conf_content = json.load(conf_file)
+        REPO_PATH = conf_content["repo_path"]
+        COMMIT = conf_content["commit_count"]
+        VERSIONED_FILE_NAMES = conf_content["versioned_file_names"]
+        REMOTE_AUTH = conf_content["remote_auth"]
+
+
+def update_remote_auth_status():
+    """
+    Changes the REMOTE_AUTH status to True after a succesfull authorization with the remote repo.
+    """
+    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
+        conf_content = json.load(conf_file)
+
+        # The changes to the configuration file are done here:
+        conf_content["remote_auth"] = True
+
+    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "w") as conf_file:
+        json.dump(conf_content, conf_file)
+
+
+def inc_commit_counter():
+    """
+    Increases by 1 the commit counter in the configuration file.
+    """
+    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
+        conf_content = json.load(conf_file)
+
+        # The changes to the configuration file are done here:
+        conf_content["commit_count"] += 1
+
+    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "w") as conf_file:
+        json.dump(conf_content, conf_file)
+
+
+# Argument handlers:
 
 def handle_commit(commit_message):
     conf_parse()  # Extracts the data from the configuration file into global variables before operation.
@@ -125,7 +140,7 @@ def handle_commit(commit_message):
                 print("Committed succesfully.")
 
         COMMIT += 1
-        conf_update()  # Updates the configuration file with changes.
+        inc_commit_counter()  # Updates the configuration file with changes.
     else:
         print("No repository found.")
 
@@ -144,6 +159,7 @@ def handle_init():
         conf_json["repo_path"] = REPO_PATH
         conf_json["commit_count"] = COMMIT
         conf_json["versioned_file_names"] = find_midi_files()
+        conf_json["remote_auth"] = False
 
         with open(os.path.join(REPO_PATH, "conf.json"), "w") as conf_file:
             json.dump(conf_json, conf_file)
@@ -163,3 +179,17 @@ def handle_delete():
     elif user_input != "y" or user_input != "n":
         print("Enter a valid letter.")
 
+
+def handle_push():
+    global REMOTE_AUTH
+    conf_parse()
+
+    client = client_class.Client()
+    client.start_client()
+
+    if not REMOTE_AUTH:
+        if client.auth_user():
+            print("connection authorized")
+            # update_remote_auth_status()
+        else:
+            print("no auth")
