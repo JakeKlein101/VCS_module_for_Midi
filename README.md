@@ -76,8 +76,7 @@ The VCS module portion utilizes the following python libraries:
 <!-- GETTING STARTED -->
 ## Getting Started
 
-A good start to your journey into the Git Bit ecosystem is 
-with creating an account in the [website.](https://github.com/JakeKlein101/Git-Bit_site_Django)
+A good start to your journey into the Git Bit ecosystem is with creating an account on the [website.](https://github.com/JakeKlein101/Git-Bit_site_Django)
 
 
 
