@@ -10,7 +10,7 @@ LEGAL_OPCODES = ["authreq"]
 
 class Server:
     def __init__(self):
-        self._server_sock = server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._server_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def start_server(self):
         """
