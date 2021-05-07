@@ -19,7 +19,7 @@ def file_paths_to_midi_objects(latest_file_path, second_to_last_file_path):
 def log_diffs_to_file(latest_file_path, latest_file_ms, track_index, message_index):
     """
     Logs the diffences that were found between the MIDI files to a changes.gitbit file.
-    The format of the loggin in the file is as followed:
+    The format of the logging in the file is as followed:
     Track index of diff:Message index of diff:Diff message.
     """
     with open(os.path.join(os.path.dirname(latest_file_path), "changes.gitbit"), "a") as changes_log_file:
