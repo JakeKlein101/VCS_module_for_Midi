@@ -20,7 +20,7 @@
 <br />
 <p align="center">
   <a href="#">
-    <img src="images/loading-logo.gif" alt="Git-bit logo">
+    <img src="images/loading-logo.gif" alt="Git-bit logo" height="156" width="546">
   </a>
 
   <h3 align="center">Git-Bit VCS Module</h3>
