@@ -43,7 +43,6 @@
     <li>
       <a href="#getting-started">Getting Started</a>
       <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
@@ -90,13 +89,18 @@ Coming soon.
 ### Commands
 
 The main commands are as follows:
-* init
+* Initiate a repository
   ```sh
   > gitbit init
   ```
-* commit
+* Commit changes
   ```sh
   > gitbit commit -o "Optional commit message."
+  ```
+  * Delete the repository
+  ```sh
+  > gitbit delete
+  > "Are you sure you want to delete the repository? y/n: "
   ```
 
 For information about the website portion, please refer to this [repository.](https://github.com/JakeKlein101/Git-Bit_site_Django)

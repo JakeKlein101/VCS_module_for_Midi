@@ -171,7 +171,7 @@ def handle_delete():
     conf_parse()
     global REPO_PATH
 
-    user_input = input("Are you sure you want to delete the repository? y/n: ")
+    user_input = input("Are you sure you want to delete the repository? y/n: ").lower()
     if user_input == "y":
         shutil.rmtree(REPO_PATH)
     elif user_input == "n":
