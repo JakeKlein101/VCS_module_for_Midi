@@ -102,15 +102,16 @@ def update_remote_auth_status():
         json.dump(conf_content, conf_file)
 
 
-def inc_commit_counter():
+def modify_commit_counter(num):
     """
-    Increases by 1 the commit counter in the configuration file.
+    Updates the commit_counter by an amount that is passed in the num argument.
+    :param num: the amount to add to the commit counter(can be negative to decrease the commit counter).
     """
     with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
         conf_content = json.load(conf_file)
 
         # The changes to the configuration file are done here:
-        conf_content["commit_count"] += 1
+        conf_content["commit_count"] += num
 
     with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "w") as conf_file:
         json.dump(conf_content, conf_file)
@@ -135,12 +136,14 @@ def handle_commit(commit_message):
             latest_file_path, second_to_last_file_path = get_paths_of_files_to_compare()
             return_code = diff_module.main_diff(latest_file_path, second_to_last_file_path)
             if return_code == 0:
+                print("No changes were made.")
                 shutil.rmtree(os.path.join(REPO_PATH, "commit " + str(COMMIT)))
-            elif return_code == 1:
+                modify_commit_counter(-1)
+            else:
                 print("Committed succesfully.")
 
         COMMIT += 1
-        inc_commit_counter()  # Updates the configuration file with changes.
+        modify_commit_counter(1)  # Updates the configuration file with changes.
     else:
         print("No repository found.")
 
@@ -174,6 +177,7 @@ def handle_delete():
     user_input = input("Are you sure you want to delete the repository? y/n: ").lower()
     if user_input == "y":
         shutil.rmtree(REPO_PATH)
+        print("Repo deleted successfully.")
     elif user_input == "n":
         print("Regret isnt always a bad thing :)")
     elif user_input != "y" or user_input != "n":

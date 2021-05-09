@@ -30,7 +30,6 @@ def log_diffs_to_file(latest_file_path, latest_file_ms, track_index, message_ind
 
 def main_diff(latest_file_path, second_to_last_file_path):  # TODO: check all edge cases.
     if filecmp.cmp(latest_file_path, second_to_last_file_path):
-        print("No changes were made.")
         return 0
 
     latest_file, second_to_last_file = file_paths_to_midi_objects(latest_file_path, second_to_last_file_path)
@@ -48,8 +47,7 @@ def main_diff(latest_file_path, second_to_last_file_path):  # TODO: check all ed
             print(f"Checking track messages for track  {track_index}:")
             for message_index, packed_args in enumerate(zip(latest_file_track, second_to_last_file_track)):
                 latest_file_ms, second_to_last_file_ms = packed_args
-                print(str(message_index) + " Latest: " + str(latest_file_ms)
-                      + " Second Latest: " + str(second_to_last_file_ms))
+                print(f"{message_index} Latest: {latest_file_ms} Second Latest: {second_to_last_file_ms}")
                 if latest_file_ms != second_to_last_file_ms:
                     log_diffs_to_file(latest_file_path, latest_file_ms, track_index, message_index)
                     print(False)

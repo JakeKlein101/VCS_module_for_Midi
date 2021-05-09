@@ -19,6 +19,8 @@ def main():
         VCS_main.handle_delete()
     elif args.opcode == "push":
         VCS_main.handle_push()
+    else:
+        print(f"{args.opcode} is not a legal command.")
     # TODO: Add rollback command.
 
 
