@@ -184,6 +184,10 @@ def handle_delete():
         print("Enter a valid letter.")
 
 
+def handle_connect(repo_id):
+    pass  # will connect the local to the remote repo.
+
+
 def handle_push():
     global REMOTE_AUTH
     conf_parse()

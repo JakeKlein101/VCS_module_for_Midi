@@ -10,6 +10,7 @@ BUFFER_SIZE = 4096
 AUTH_SUCCESS = "0"
 FALSE_REQUEST = "-1"
 AUTH_REQUEST = b"authreq"
+PUSH_CODE = b"push"
 
 
 class Client:
