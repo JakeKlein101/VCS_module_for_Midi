@@ -190,6 +190,7 @@ def handle_connect(repo_id):
 
 def handle_push():
     global REMOTE_AUTH
+    global VERSIONED_FILE_NAMES
     conf_parse()
 
     client = client_class.Client()
@@ -201,4 +202,4 @@ def handle_push():
             update_remote_auth_status()
         else:
             print("no auth")
-    client.push_to_remote()
+    client.push_to_remote(VERSIONED_FILE_NAMES[0])

@@ -1,10 +1,10 @@
 import socket
-import time
+import sys
 
 # Socket consts:
 
 IP = "127.0.0.1"
-PORT = 8000
+PORT = 10000
 BUFFER_SIZE = 4096
 
 # Codes:
@@ -12,6 +12,16 @@ AUTH_SUCCESS = "0"
 FALSE_REQUEST = "-1"
 AUTH_REQUEST = b"authreq"
 PUSH_CODE = b"push"
+FILE_NAME_RECIEVE_SUCCESS = "RFNS"  # Recieved file name.
+FILE_RECIEVE_SUCCESS = "RFS"  # Recived file succesfully.
+FILE_RECIEVE_FAIL = "RFF"  # Recieving file failed.
+OPCODE_RECIEVE_SUCCESS = "ROS"  # Recieved opcode successfully
+OPCODE_RECIEVE_FAIL = "ROF"  # Recieving opcode failed.
+
+
+class RemoteRepoRecieveError(Exception):
+    def __str__(self):
+        return "the passed content wasnt recieved on the other end."
 
 
 class Client:
@@ -30,11 +40,27 @@ class Client:
             print("Illegal opcode, false request.")
             return False
 
-    def push_to_remote(self):
-        self._sock.send(PUSH_CODE)
-        time.sleep(2)
-        self._sock.send(b"origin.mid")
-        recieved = self._sock.recv(BUFFER_SIZE).decode()
-        print(recieved)
-        with open("D:\Python projects\gitbit\VCS module\origin.mid", "rb") as file:
-            self._sock.send(file.read())
+    def push_to_remote(self, file_path):
+        try:
+            self._sock.send(PUSH_CODE)
+            opcode_ack = self._sock.recv(BUFFER_SIZE).decode()
+            print(opcode_ack)
+            if opcode_ack == OPCODE_RECIEVE_FAIL:
+                raise RemoteRepoRecieveError
+
+            self._sock.send(b"modified.mid")
+            recieved = self._sock.recv(BUFFER_SIZE).decode()
+            print(recieved)
+
+            with open(file_path, "rb") as file:
+                self._sock.send(file.read())
+
+            ack_code = self._sock.recv(BUFFER_SIZE).decode()
+            print(ack_code)
+            if ack_code == FILE_RECIEVE_FAIL:
+                raise RemoteRepoRecieveError
+
+        except (RemoteRepoRecieveError, ConnectionResetError) as e:  # TODO: Fix exceptions.
+            print(e == ConnectionResetError)
+            if e == ConnectionResetError:
+                print("Server closed")
