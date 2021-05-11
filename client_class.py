@@ -1,4 +1,5 @@
 import socket
+import time
 
 # Socket consts:
 
@@ -28,3 +29,12 @@ class Client:
         elif recieved == FALSE_REQUEST:
             print("Illegal opcode, false request.")
             return False
+
+    def push_to_remote(self):
+        self._sock.send(PUSH_CODE)
+        time.sleep(2)
+        self._sock.send(b"origin.mid")
+        recieved = self._sock.recv(BUFFER_SIZE).decode()
+        print(recieved)
+        with open("D:\Python projects\gitbit\VCS module\origin.mid", "rb") as file:
+            self._sock.send(file.read())

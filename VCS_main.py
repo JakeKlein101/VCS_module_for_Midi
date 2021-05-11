@@ -198,6 +198,7 @@ def handle_push():
     if not REMOTE_AUTH:
         if client.auth_user():
             print("connection authorized")
-            # update_remote_auth_status()
+            update_remote_auth_status()
         else:
             print("no auth")
+    client.push_to_remote()
