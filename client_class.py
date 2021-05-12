@@ -17,6 +17,8 @@ FILE_RECIEVE_FAIL = "RFF"  # Recieving file failed.
 OPCODE_RECIEVE_SUCCESS = "ROS"  # Recieved opcode successfully
 OPCODE_RECIEVE_FAIL = "ROF"  # Recieving opcode failed.
 AUTH_SUCCESS = "AS"  # Auth success
+REPO_ID_RECIEVE_SUCCESS = "RRIS"  # Recieving repository ID success.
+REPO_ID_RECIEVE_FAIL = "RRIF"  # Recieving repository ID failed.
 
 
 class RemoteRepoRecieveError(Exception):
@@ -32,23 +34,35 @@ class Client:
         self._sock.connect((IP, PORT))
 
     def auth_user(self):
-        self._sock.send(AUTH_REQUEST)
-        opcode_ack = self._sock.recv(BUFFER_SIZE).decode()
-        print(opcode_ack)
-        self._sock.send(b"password")
-        auth_ack = self._sock.recv(BUFFER_SIZE).decode()
-        if auth_ack == AUTH_SUCCESS:
-            return True
-        elif auth_ack == FALSE_REQUEST:
-            print("Illegal opcode, false request.")
-            return False
+        try:
+            self._sock.send(AUTH_REQUEST)
+            opcode_ack = self._sock.recv(BUFFER_SIZE).decode()
+            print(opcode_ack)
+            if opcode_ack == OPCODE_RECIEVE_FAIL:
+                raise RemoteRepoRecieveError
 
-    def push_to_remote(self, file_path):
+            self._sock.send(b"password")
+            auth_ack = self._sock.recv(BUFFER_SIZE).decode()
+            if auth_ack == AUTH_SUCCESS:
+                return True
+            elif auth_ack == FALSE_REQUEST:
+                raise RemoteRepoRecieveError
+
+        except RemoteRepoRecieveError as e:
+            print("Remote server has failed to recieve data")
+
+    def push_to_remote(self, file_path, remote_repo_id):
         try:
             self._sock.send(PUSH_CODE)
             opcode_ack = self._sock.recv(BUFFER_SIZE).decode()
             print(opcode_ack)
             if opcode_ack == OPCODE_RECIEVE_FAIL:
+                raise RemoteRepoRecieveError
+
+            self._sock.send(str(remote_repo_id).encode())
+            repo_id_ack = self._sock.recv(BUFFER_SIZE).decode()
+            print(repo_id_ack)
+            if repo_id_ack == REPO_ID_RECIEVE_FAIL:
                 raise RemoteRepoRecieveError
 
             self._sock.send(b"modified.mid")

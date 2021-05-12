@@ -166,7 +166,7 @@ def handle_init():
         conf_json["commit_count"] = COMMIT
         conf_json["versioned_file_names"] = find_midi_files()
         conf_json["remote_auth"] = False
-        conf_json["remote_repo_id"] = -1
+        conf_json["remote_repo_id"] = 15
 
         with open(os.path.join(REPO_PATH, "conf.json"), "w") as conf_file:
             json.dump(conf_json, conf_file)
@@ -196,6 +196,7 @@ def handle_push():
     global REMOTE_AUTH
     global VERSIONED_FILE_NAMES
     global COMMIT
+    global REMOTE_REPO_ID
     conf_parse()
 
     if COMMIT >= 1:
@@ -208,6 +209,6 @@ def handle_push():
                 update_remote_auth_status()
             else:
                 print("no auth")
-        client.push_to_remote(VERSIONED_FILE_NAMES[0])
+        client.push_to_remote(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID)
     else:
         print("No commmits to push.")
