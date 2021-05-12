@@ -1,5 +1,4 @@
 import socket
-import sys
 
 # Socket consts:
 
@@ -8,7 +7,7 @@ PORT = 10000
 BUFFER_SIZE = 4096
 
 # Codes:
-AUTH_SUCCESS = "0"
+
 FALSE_REQUEST = "-1"
 AUTH_REQUEST = b"authreq"
 PUSH_CODE = b"push"
@@ -17,6 +16,7 @@ FILE_RECIEVE_SUCCESS = "RFS"  # Recived file succesfully.
 FILE_RECIEVE_FAIL = "RFF"  # Recieving file failed.
 OPCODE_RECIEVE_SUCCESS = "ROS"  # Recieved opcode successfully
 OPCODE_RECIEVE_FAIL = "ROF"  # Recieving opcode failed.
+AUTH_SUCCESS = "AS"  # Auth success
 
 
 class RemoteRepoRecieveError(Exception):
@@ -33,10 +33,13 @@ class Client:
 
     def auth_user(self):
         self._sock.send(AUTH_REQUEST)
-        recieved = self._sock.recv(BUFFER_SIZE).decode()
-        if recieved == AUTH_SUCCESS:
+        opcode_ack = self._sock.recv(BUFFER_SIZE).decode()
+        print(opcode_ack)
+        self._sock.send(b"password")
+        auth_ack = self._sock.recv(BUFFER_SIZE).decode()
+        if auth_ack == AUTH_SUCCESS:
             return True
-        elif recieved == FALSE_REQUEST:
+        elif auth_ack == FALSE_REQUEST:
             print("Illegal opcode, false request.")
             return False
 

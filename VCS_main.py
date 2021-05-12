@@ -12,6 +12,7 @@ REPO_PATH = ""
 COMMIT = 0
 VERSIONED_FILE_NAMES = []
 REMOTE_AUTH = None
+REMOTE_REPO_ID = -1
 
 
 # Utility functions:
@@ -79,6 +80,7 @@ def conf_parse():
     global COMMIT
     global VERSIONED_FILE_NAMES
     global REMOTE_AUTH
+    global REMOTE_REPO_ID
 
     with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
         conf_content = json.load(conf_file)
@@ -86,6 +88,7 @@ def conf_parse():
         COMMIT = conf_content["commit_count"]
         VERSIONED_FILE_NAMES = conf_content["versioned_file_names"]
         REMOTE_AUTH = conf_content["remote_auth"]
+        REMOTE_REPO_ID = conf_content["remote_repo_id"]
 
 
 def update_remote_auth_status():
@@ -163,6 +166,7 @@ def handle_init():
         conf_json["commit_count"] = COMMIT
         conf_json["versioned_file_names"] = find_midi_files()
         conf_json["remote_auth"] = False
+        conf_json["remote_repo_id"] = -1
 
         with open(os.path.join(REPO_PATH, "conf.json"), "w") as conf_file:
             json.dump(conf_json, conf_file)
@@ -191,15 +195,19 @@ def handle_connect(repo_id):
 def handle_push():
     global REMOTE_AUTH
     global VERSIONED_FILE_NAMES
+    global COMMIT
     conf_parse()
 
-    client = client_class.Client()
-    client.start_client()
+    if COMMIT >= 1:
+        client = client_class.Client()
+        client.start_client()
 
-    if not REMOTE_AUTH:
-        if client.auth_user():
-            print("connection authorized")
-            update_remote_auth_status()
-        else:
-            print("no auth")
-    client.push_to_remote(VERSIONED_FILE_NAMES[0])
+        if not REMOTE_AUTH:
+            if client.auth_user():
+                print("connection authorized")
+                update_remote_auth_status()
+            else:
+                print("no auth")
+        client.push_to_remote(VERSIONED_FILE_NAMES[0])
+    else:
+        print("No commmits to push.")
