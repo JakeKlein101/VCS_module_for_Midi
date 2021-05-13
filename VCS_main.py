@@ -120,6 +120,17 @@ def modify_commit_counter(num):
         json.dump(conf_content, conf_file)
 
 
+def set_repo_id(repo_id):
+    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
+        conf_content = json.load(conf_file)
+
+        # The changes to the configuration file are done here:
+        conf_content["remote_repo_id"] = repo_id
+
+    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "w") as conf_file:
+        json.dump(conf_content, conf_file)
+
+
 # Argument handlers:
 
 def handle_commit(commit_message):
@@ -166,10 +177,11 @@ def handle_init():
         conf_json["commit_count"] = COMMIT
         conf_json["versioned_file_names"] = find_midi_files()
         conf_json["remote_auth"] = False
-        conf_json["remote_repo_id"] = 15
+        conf_json["remote_repo_id"] = -1
 
         with open(os.path.join(REPO_PATH, "conf.json"), "w") as conf_file:
             json.dump(conf_json, conf_file)
+        print("Repository created successfully.")
     else:
         print("There is already a repository in this working directory.")
 
@@ -192,7 +204,7 @@ def handle_connect(repo_id):
     pass  # will connect the local to the remote repo.
 
 
-def handle_push():
+def handle_push():  # TODO: Add push counter ...?
     global REMOTE_AUTH
     global VERSIONED_FILE_NAMES
     global COMMIT
@@ -209,6 +221,11 @@ def handle_push():
                 update_remote_auth_status()
             else:
                 print("no auth")
+
+        if int(REMOTE_REPO_ID) == -1:
+            REMOTE_REPO_ID = input("Enter a repository ID: ")
+
         client.push_to_remote(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID)
+        set_repo_id(REMOTE_REPO_ID)
     else:
         print("No commmits to push.")
