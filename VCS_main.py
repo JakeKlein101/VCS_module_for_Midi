@@ -139,7 +139,7 @@ def handle_commit(commit_message):
     global COMMIT
 
     if os.path.exists(REPO_PATH):
-        print("Commit message: ", commit_message)
+        # print("Commit message: ", commit_message)
         if COMMIT >= 5:
             delete_fifth_last()
 
@@ -155,6 +155,8 @@ def handle_commit(commit_message):
                 modify_commit_counter(-1)
             else:
                 print("Committed succesfully.")
+        else:
+            print("Committed succesfully.")
 
         COMMIT += 1
         modify_commit_counter(1)  # Updates the configuration file with changes.

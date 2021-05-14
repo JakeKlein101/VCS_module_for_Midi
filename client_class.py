@@ -37,7 +37,7 @@ class Client:
         try:
             self._sock.send(AUTH_REQUEST)
             opcode_ack = self._sock.recv(BUFFER_SIZE).decode()
-            print(opcode_ack)
+            # print(opcode_ack)
             if opcode_ack == OPCODE_RECIEVE_FAIL:
                 raise RemoteRepoRecieveError
 
@@ -55,25 +55,25 @@ class Client:
         try:
             self._sock.send(PUSH_CODE)
             opcode_ack = self._sock.recv(BUFFER_SIZE).decode()
-            print(opcode_ack)
+            # print(opcode_ack)
             if opcode_ack == OPCODE_RECIEVE_FAIL:
                 raise RemoteRepoRecieveError
 
             self._sock.send(str(remote_repo_id).encode())
             repo_id_ack = self._sock.recv(BUFFER_SIZE).decode()
-            print(repo_id_ack)
+            # print(repo_id_ack)
             if repo_id_ack == REPO_ID_RECIEVE_FAIL:
                 raise RemoteRepoRecieveError
 
             self._sock.send(b"modified.mid")
             recieved = self._sock.recv(BUFFER_SIZE).decode()
-            print(recieved)
+            # print(recieved)
 
             with open(file_path, "rb") as file:
                 self._sock.send(file.read())
 
             ack_code = self._sock.recv(BUFFER_SIZE).decode()
-            print(ack_code)
+            # print(ack_code)
             if ack_code == FILE_RECIEVE_FAIL:
                 raise RemoteRepoRecieveError
 
@@ -81,3 +81,5 @@ class Client:
             print(e == ConnectionResetError)
             if e == ConnectionResetError:
                 print("Server closed")
+        else:
+            print("Successfully pushed the latest commit to the remote repository.")
