@@ -11,7 +11,8 @@ BUFFER_SIZE = 4096
 FALSE_REQUEST = "-1"
 AUTH_REQUEST = b"authreq"
 PUSH_CODE = b"push"
-FILE_NAME_RECIEVE_SUCCESS = "RFNS"  # Recieved file name.
+FILE_NAME_RECIEVE_SUCCESS = "RFNS"  # Recieved file name success.
+FILE_NAME_RECIEVE_FAIL= "RFNF"  # Recieved file name fail.
 FILE_RECIEVE_SUCCESS = "RFS"  # Recived file succesfully.
 FILE_RECIEVE_FAIL = "RFF"  # Recieving file failed.
 OPCODE_RECIEVE_SUCCESS = "ROS"  # Recieved opcode successfully
@@ -31,6 +32,9 @@ class Client:
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def start_client(self):
+        """
+        Connects the socket to the server socket.
+        """
         self._sock.connect((IP, PORT))
 
     def auth_user(self):
@@ -51,7 +55,14 @@ class Client:
         except RemoteRepoRecieveError as e:
             print("Remote server has failed to recieve data")
 
-    def push_to_remote(self, file_path, remote_repo_id):
+    def push_to_remote(self, file_name, remote_repo_id):
+        """
+        Sends a push opcode to the server, then sends the repo_id, then the file name and lastly, the file itself.
+        At any point, the program can be interrupted by a negative ACK from the server, which wil cause the throwing of
+        a RemoteRepoRecieveError.
+        :param file_name: The name of the file that we send to the remote server.
+        :param remote_repo_id: The id of the remote repo were pushing to.
+        """
         try:
             self._sock.send(PUSH_CODE)
             opcode_ack = self._sock.recv(BUFFER_SIZE).decode()
@@ -63,10 +74,12 @@ class Client:
             if repo_id_ack == REPO_ID_RECIEVE_FAIL:
                 raise RemoteRepoRecieveError
 
-            self._sock.send(file_path.encode())
-            recieved = self._sock.recv(BUFFER_SIZE).decode()
+            self._sock.send(file_name.encode())
+            file_name_ack = self._sock.recv(BUFFER_SIZE).decode()
+            if file_name_ack == FILE_NAME_RECIEVE_FAIL:
+                raise RemoteRepoRecieveError
 
-            with open(file_path, "rb") as file:
+            with open(file_name, "rb") as file:
                 self._sock.send(file.read())
 
             ack_code = self._sock.recv(BUFFER_SIZE).decode()
