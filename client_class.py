@@ -42,7 +42,7 @@ class Client:
         """
         self._sock.connect((IP, PORT))
 
-    def auth_user(self):
+    def auth_user(self):  # working progress.
         try:
             self._sock.send(AUTH_REQUEST.encode())
             opcode_ack = self._sock.recv(BUFFER_SIZE).decode()
