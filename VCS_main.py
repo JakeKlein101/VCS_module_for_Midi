@@ -153,7 +153,6 @@ def handle_commit():
     global COMMIT
 
     if os.path.exists(REPO_PATH):
-        # print("Commit message: ", commit_message)
         if COMMIT >= 5:
             delete_fifth_last()
 
