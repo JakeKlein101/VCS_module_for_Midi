@@ -147,7 +147,7 @@ def set_remote_commit(commit_num):
 
 # Argument handlers:
 
-def handle_commit(commit_message):
+def handle_commit():
     conf_parse()  # Extracts the data from the configuration file into global variables before operation.
     global REPO_PATH
     global COMMIT
