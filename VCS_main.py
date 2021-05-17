@@ -42,9 +42,11 @@ def copy_midi_file_to_commit_dir():
     global COMMIT
     global VERSIONED_FILE_NAMES
 
-    for file_name in VERSIONED_FILE_NAMES:
-        shutil.copyfile(os.path.join(os.getcwd(), file_name),
-                        os.path.join(REPO_PATH, "commit " + str(COMMIT), file_name))
+    file_name = VERSIONED_FILE_NAMES[0]
+
+    # for file_name in VERSIONED_FILE_NAMES:
+    shutil.copyfile(os.path.join(os.getcwd(), file_name),
+                    os.path.join(REPO_PATH, "commit " + str(COMMIT), file_name))
 
 
 def find_midi_files():
