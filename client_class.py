@@ -1,4 +1,5 @@
 import socket
+import getpass
 
 # Socket consts:
 
@@ -54,7 +55,7 @@ class Client:
             if username_ack == USERNAME_RECIEVE_FAIL:
                 raise RemoteRepoRecieveError
 
-            password = input("Enter password: ")
+            password = getpass.getpass("Enter password (hidden input): ")
             self._sock.send(password.encode())
             password_ack = self._sock.recv(BUFFER_SIZE).decode()
             if password_ack == PASSWORD_RECIEVE_FAIL:
