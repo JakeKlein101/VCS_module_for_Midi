@@ -13,6 +13,7 @@ COMMIT = 0
 VERSIONED_FILE_NAMES = []
 REMOTE_AUTH = None
 REMOTE_REPO_ID = -1
+REMOTE_COMMIT = -1
 
 
 # Utility functions:
@@ -81,6 +82,7 @@ def conf_parse():
     global VERSIONED_FILE_NAMES
     global REMOTE_AUTH
     global REMOTE_REPO_ID
+    global REMOTE_COMMIT
 
     with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
         conf_content = json.load(conf_file)
@@ -89,6 +91,7 @@ def conf_parse():
         VERSIONED_FILE_NAMES = conf_content["versioned_file_names"]
         REMOTE_AUTH = conf_content["remote_auth"]
         REMOTE_REPO_ID = conf_content["remote_repo_id"]
+        REMOTE_COMMIT = conf_content["remote_commit"]
 
 
 def update_remote_auth_status():
@@ -126,6 +129,17 @@ def set_repo_id(repo_id):
 
         # The changes to the configuration file are done here:
         conf_content["remote_repo_id"] = repo_id
+
+    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "w") as conf_file:
+        json.dump(conf_content, conf_file)
+
+
+def set_remote_commit(commit_num):
+    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
+        conf_content = json.load(conf_file)
+
+        # The changes to the configuration file are done here:
+        conf_content["remote_commit"] = commit_num
 
     with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "w") as conf_file:
         json.dump(conf_content, conf_file)
@@ -180,6 +194,7 @@ def handle_init():
         conf_json["versioned_file_names"] = find_midi_files()
         conf_json["remote_auth"] = False
         conf_json["remote_repo_id"] = -1
+        conf_json["remote_commit"] = -1
 
         with open(os.path.join(REPO_PATH, "conf.json"), "w") as conf_file:
             json.dump(conf_json, conf_file)
@@ -206,28 +221,39 @@ def handle_connect(repo_id):
     pass  # will connect the local to the remote repo.
 
 
-def handle_push():  # TODO: Add push counter ...?
+def handle_push():
     global REMOTE_AUTH
     global VERSIONED_FILE_NAMES
     global COMMIT
     global REMOTE_REPO_ID
+    global REMOTE_COMMIT
     conf_parse()
 
     if COMMIT >= 1:
-        client = client_class.Client()
-        client.start_client()
+        if COMMIT > REMOTE_COMMIT:
+            client = client_class.Client()
+            client.start_client()
 
-        if not REMOTE_AUTH:
-            if client.auth_user():
-                print("connection authorized")
-                update_remote_auth_status()
+            if not REMOTE_AUTH:
+                if client.auth_user():
+                    print("connection authorized")
+                    update_remote_auth_status()
+                else:
+                    print("no auth")
+
+            if int(REMOTE_REPO_ID) > -1:
+                client.push_to_remote(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID)
+                set_remote_commit(COMMIT)
+
             else:
-                print("no auth")
+                REMOTE_REPO_ID = input("Enter a repository ID: ")
+                set_repo_id(REMOTE_REPO_ID)
+                client.push_to_remote(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID)
+                set_remote_commit(COMMIT)
 
-        if int(REMOTE_REPO_ID) == -1:
-            REMOTE_REPO_ID = input("Enter a repository ID: ")
-
-        client.push_to_remote(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID)
-        set_repo_id(REMOTE_REPO_ID)
+        elif COMMIT == REMOTE_COMMIT:
+            print("The latest commit was already pushed.")
+        else:  # Should be impossible to get here.
+            print("How?")
     else:
         print("No commmits to push.")
