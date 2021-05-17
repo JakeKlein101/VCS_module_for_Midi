@@ -126,6 +126,11 @@ def modify_commit_counter(num):
 
 
 def set_repo_id(repo_id):
+    """
+    Sets the remote repository id as the argument given.
+    The user has to input the ID only once, and then it will be automatically pulled from the conf.json file.
+    :param repo_id: The id of the remote repository.
+    """
     with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
         conf_content = json.load(conf_file)
 
@@ -137,6 +142,10 @@ def set_repo_id(repo_id):
 
 
 def set_remote_commit(commit_num):
+    """
+    Sets the remote_commit as the argument given.
+    :param commit_num: The number of the latest commit that was pushed.
+    """
     with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
         conf_content = json.load(conf_file)
 
