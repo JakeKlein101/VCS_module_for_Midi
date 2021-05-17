@@ -246,6 +246,7 @@ def handle_push():
                     update_remote_auth_status()
                 else:
                     print("no auth")
+                    return
 
             if int(REMOTE_REPO_ID) > -1:
                 client.push_to_remote(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID)
@@ -256,6 +257,7 @@ def handle_push():
                 set_repo_id(REMOTE_REPO_ID)
                 client.push_to_remote(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID)
                 set_remote_commit(COMMIT)
+            print("Pushed commits successfully.")
 
         elif COMMIT == REMOTE_COMMIT:
             print("The latest commit was already pushed.")

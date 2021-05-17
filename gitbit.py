@@ -4,7 +4,6 @@ import argparse
 parser = argparse.ArgumentParser(description="Parser for gitbit VCS commands.")
 parser.add_argument("opcode", type=str, help="Choose an opcode that suits the wanted operation."
                                              " for example: commit, push, init.")
-parser.add_argument("-o", "--opcode_args", type=str, help="Optional arguments for certian functions.")
 
 
 def main():
@@ -19,7 +18,6 @@ def main():
         VCS_main.handle_push()
     else:
         print(f"{args.opcode} is not a legal command.")
-    # TODO: Add rollback command.
 
 
 if __name__ == '__main__':

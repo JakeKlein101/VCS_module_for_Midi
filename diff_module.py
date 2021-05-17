@@ -28,7 +28,7 @@ def log_diffs_to_file(latest_file_path, latest_file_ms, track_index, message_ind
 
 # Main method:
 
-def main_diff(latest_file_path, second_to_last_file_path):  # TODO: check all edge cases.
+def main_diff(latest_file_path, second_to_last_file_path):
     if filecmp.cmp(latest_file_path, second_to_last_file_path):
         return 0
 

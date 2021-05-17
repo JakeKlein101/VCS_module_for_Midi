@@ -9,8 +9,8 @@ BUFFER_SIZE = 4096
 # Codes:
 
 FALSE_REQUEST = "-1"
-AUTH_REQUEST = b"authreq"
-PUSH_CODE = b"push"
+AUTH_REQUEST = "authreq"
+PUSH_CODE = "push"
 FILE_NAME_RECIEVE_SUCCESS = "RFNS"  # Recieved file name success.
 FILE_NAME_RECIEVE_FAIL= "RFNF"  # Recieved file name fail.
 FILE_RECIEVE_SUCCESS = "RFS"  # Recived file succesfully.
@@ -20,6 +20,10 @@ OPCODE_RECIEVE_FAIL = "ROF"  # Recieving opcode failed.
 AUTH_SUCCESS = "AS"  # Auth success
 REPO_ID_RECIEVE_SUCCESS = "RRIS"  # Recieving repository ID success.
 REPO_ID_RECIEVE_FAIL = "RRIF"  # Recieving repository ID failed.
+PASSWORD_RECIEVE_FAIL = "RPF"  # Recieving password failed.
+PASSWORD_RECIEVE_SUCCESS = "RPS"  # Recieved password succesfully.
+USERNAME_RECIEVE_SUCCESS = "URS"  # Username recieved succefully.
+USERNAME_RECIEVE_FAIL = "URF"  # Username recieving failed.
 
 
 class RemoteRepoRecieveError(Exception):
@@ -39,13 +43,24 @@ class Client:
 
     def auth_user(self):
         try:
-            self._sock.send(AUTH_REQUEST)
+            self._sock.send(AUTH_REQUEST.encode())
             opcode_ack = self._sock.recv(BUFFER_SIZE).decode()
-            # print(opcode_ack)
             if opcode_ack == OPCODE_RECIEVE_FAIL:
                 raise RemoteRepoRecieveError
 
-            self._sock.send(b"password")
+            username = input("Enter username: ")
+            self._sock.send(username.encode())
+            username_ack = self._sock.recv(BUFFER_SIZE).decode()
+            if username_ack == USERNAME_RECIEVE_FAIL:
+                raise RemoteRepoRecieveError
+
+            password = input("Enter password: ")
+            self._sock.send(password.encode())
+            password_ack = self._sock.recv(BUFFER_SIZE).decode()
+            if password_ack == PASSWORD_RECIEVE_FAIL:
+                raise RemoteRepoRecieveError
+
+            self._sock.send(AUTH_REQUEST.encode())
             auth_ack = self._sock.recv(BUFFER_SIZE).decode()
             if auth_ack == AUTH_SUCCESS:
                 return True
@@ -64,7 +79,7 @@ class Client:
         :param remote_repo_id: The id of the remote repo were pushing to.
         """
         try:
-            self._sock.send(PUSH_CODE)
+            self._sock.send(PUSH_CODE.encode())
             opcode_ack = self._sock.recv(BUFFER_SIZE).decode()
             if opcode_ack == OPCODE_RECIEVE_FAIL:
                 raise RemoteRepoRecieveError
@@ -86,9 +101,5 @@ class Client:
             if ack_code == FILE_RECIEVE_FAIL:
                 raise RemoteRepoRecieveError
 
-        except (RemoteRepoRecieveError, ConnectionResetError) as e:  # TODO: Fix exceptions.
-            print(e == ConnectionResetError)
-            if e == ConnectionResetError:
-                print("Server closed")
-        else:
-            print("Successfully pushed the latest commit to the remote repository.")
+        except RemoteRepoRecieveError as e:
+            print(e)
