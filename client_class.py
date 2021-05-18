@@ -21,7 +21,16 @@ class Client:
         """
         self._sock.connect((IP, PORT))
 
-    def auth_user(self):  # working progress.
+    def auth_user(self):
+        """
+        Handles the authentication with the server. Firstly, it will send the opcode, then
+        ash the user for the username and send it, then a request for the password hash salt,
+        after recieving it it will check if the hash salt has a USER_NOT_FOUND code.
+        Because of how the server works, thats the only place were we can send a notice about a wrong username back
+        to the client. After that it will ask the client for the password and hash it using the method hash_password().
+        Then it will wait for the ack that will say if the authentication was succesfull.
+        An ACK is being recived for every piece of info sent to the server.
+        """
         try:
             self._sock.send(AUTH_REQUEST.encode())
             opcode_ack = self._sock.recv(BUFFER_SIZE).decode()

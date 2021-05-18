@@ -159,6 +159,12 @@ def set_remote_commit(commit_num):
 # Argument handlers:
 
 def handle_commit():
+    """
+    Handles the commit opcode. Firstly, it will check if there are 5 commits and will call the helper function
+    accordingly. After that it will create a directory for the commit and call the function to copy the file
+    to the created dir. If there is more than one commit, it will get the paths to the latest and second latest MIDI
+    files that were committed, and will call the main_diff method in diff_module.py.
+    """
     conf_parse()  # Extracts the data from the configuration file into global variables before operation.
     global REPO_PATH
     global COMMIT
@@ -189,6 +195,10 @@ def handle_commit():
 
 
 def handle_init():
+    """
+    Handles the init opcode. Firstly, it will created a hidden directory named ".gitbit" in the directory that the CMD
+    window was opened in. then it will create a JSON file with all the fields needed and will set defaults for them.
+    """
     global REPO_PATH
     global COMMIT
 
@@ -214,6 +224,11 @@ def handle_init():
 
 
 def handle_delete():
+    """
+    Handles the delete opcode. Firstly it will ask if the client is sure he wants to delete the repository, if he
+    answers yes, then the hidden ".gitbit" directory will be deleted. If he answered no,
+    then the deletion will be cancelled.
+    """
     conf_parse()
     global REPO_PATH
 
@@ -228,6 +243,15 @@ def handle_delete():
 
 
 def handle_push():
+    """
+    Handles the push opcode. Firstly it will check if there are commits to push using the commit counter from the JSON
+    file, after that it will check if there were commits made since the last push, if there are new commits, a new
+    client object will be created and started. It will check if the repo is already authenticated with the server,
+    if not it will initiate the auth_user() method in the Client object, if the authentication was succesfull,
+    the remote auth field will be set as true. After that it will check if there is a repo id in the JSON file,
+    if there is one it will use it, otherwise will ask the client, and the initiate the push_to_remote() method
+    in the client object.
+    """
     global REMOTE_AUTH
     global VERSIONED_FILE_NAMES
     global COMMIT
