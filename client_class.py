@@ -85,3 +85,6 @@ class Client:
 
         except Exception as e:
             print(e)
+            return False
+        else:
+            return True

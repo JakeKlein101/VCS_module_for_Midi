@@ -96,7 +96,7 @@ def conf_parse():
         REMOTE_COMMIT = conf_content["remote_commit"]
 
 
-def update_remote_auth_status():
+def update_remote_auth_status(bool_arg):
     """
     Changes the REMOTE_AUTH status to True after a succesfull authorization with the remote repo.
     """
@@ -104,7 +104,7 @@ def update_remote_auth_status():
         conf_content = json.load(conf_file)
 
         # The changes to the configuration file are done here:
-        conf_content["remote_auth"] = True
+        conf_content["remote_auth"] = bool_arg
 
     with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "w") as conf_file:
         json.dump(conf_content, conf_file)
@@ -243,20 +243,26 @@ def handle_push():
             if not REMOTE_AUTH:
                 if client.auth_user():
                     print("Connection authorized")
-                    update_remote_auth_status()
+                    update_remote_auth_status(True)
                 else:
                     return
 
             if int(REMOTE_REPO_ID) > -1:
-                client.push_to_remote(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID)
-                set_remote_commit(COMMIT)
+                if client.push_to_remote(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID):
+                    set_remote_commit(COMMIT)
+                    print("Pushed commits successfully.")
+                else:
+                    update_remote_auth_status(False)
 
             else:
                 REMOTE_REPO_ID = input("Enter a repository ID: ")
                 set_repo_id(REMOTE_REPO_ID)
-                client.push_to_remote(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID)
-                set_remote_commit(COMMIT)
-            print("Pushed commits successfully.")
+                if client.push_to_remote(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID):
+                    set_remote_commit(COMMIT)
+                    print("Pushed commits successfully.")
+                else:
+                    update_remote_auth_status(False)
+                    set_repo_id(-1)
 
         elif COMMIT == REMOTE_COMMIT:
             print("The latest commit was already pushed.")
