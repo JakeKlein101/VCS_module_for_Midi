@@ -5,4 +5,15 @@ class RemoteRepoRecieveError(Exception):
 
 class RepoDoesntBelongToAccountError(Exception):
     def __str__(self):
-        return "This repository doesnt belong to the account."
+        return "This repository doesn't belong to this account."
+
+
+class UserNotFoundError(Exception):
+    def __str__(self):
+        return "There is no account with this username."
+
+
+class WrongPasswordError(Exception):
+    def __str__(self):
+        return "Wrong password."
+

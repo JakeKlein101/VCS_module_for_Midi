@@ -36,6 +36,9 @@ class Client:
 
             self._sock.send(SALT_REQUEST.encode())
             hash_salt = self._sock.recv(BUFFER_SIZE)
+            if hash_salt.decode() == USER_NOT_FOUND:
+                raise UserNotFoundError
+
             password = getpass.getpass("Enter password (hidden input): ")
             self._sock.send(self.hash_password(password, hash_salt).encode())
 
@@ -43,17 +46,17 @@ class Client:
             if password_ack == AUTH_SUCCESS:
                 return True
 
-            elif password_ack == FALSE_REQUEST:
-                raise RemoteRepoRecieveError
+            elif password_ack == WRONG_PASSWORD:
+                raise WrongPasswordError
 
-        except RemoteRepoRecieveError as e:
-            print("Remote server has failed to recieve data")
+        except Exception as e:
+            print(e)
 
     def push_to_remote(self, file_name, remote_repo_id):
         """
         Sends a push opcode to the server, then sends the repo_id, then the file name and lastly, the file itself.
-        At any point, the program can be interrupted by a negative ACK from the server, which wil cause the throwing of
-        a RemoteRepoRecieveError.
+        At any point, the program can be interrupted by a negative ACK from the server, which will cause the throwing of
+        a RemoteRepoRecieveError or a RepoDoesntBelongToAccountError.
         :param file_name: The name of the file that we send to the remote server.
         :param remote_repo_id: The id of the remote repo were pushing to.
         """
@@ -65,7 +68,7 @@ class Client:
 
             self._sock.send(str(remote_repo_id).encode())
             repo_id_ack = self._sock.recv(BUFFER_SIZE).decode()
-            if repo_id_ack == REPO_ID_RECIEVE_FAIL:
+            if repo_id_ack == REPO_ID_FAIL:
                 raise RepoDoesntBelongToAccountError
 
             self._sock.send(file_name.encode())

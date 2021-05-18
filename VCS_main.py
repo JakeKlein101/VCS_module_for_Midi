@@ -242,10 +242,9 @@ def handle_push():
 
             if not REMOTE_AUTH:
                 if client.auth_user():
-                    print("connection authorized")
+                    print("Connection authorized")
                     update_remote_auth_status()
                 else:
-                    print("no auth")
                     return
 
             if int(REMOTE_REPO_ID) > -1:
@@ -261,7 +260,5 @@ def handle_push():
 
         elif COMMIT == REMOTE_COMMIT:
             print("The latest commit was already pushed.")
-        else:  # Should be impossible to get here.
-            print("How?")
     else:
         print("No commmits to push.")
