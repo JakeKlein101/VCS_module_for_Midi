@@ -1,5 +1,11 @@
 import socket
 import getpass
+from passlib.hash import pbkdf2_sha256
+
+# consts:
+
+HASH_ITERATIONS = 260000
+HASH_SPLIT = '$'
 
 # Socket consts:
 
@@ -25,6 +31,13 @@ PASSWORD_RECIEVE_FAIL = "RPF"  # Recieving password failed.
 PASSWORD_RECIEVE_SUCCESS = "RPS"  # Recieved password succesfully.
 USERNAME_RECIEVE_SUCCESS = "URS"  # Username recieved succefully.
 USERNAME_RECIEVE_FAIL = "URF"  # Username recieving failed.
+SALT_REQUEST = "SR"
+
+
+def hash_password(password, hash_salt):
+    hashed_password = pbkdf2_sha256.hash(password, rounds=HASH_ITERATIONS, salt=hash_salt)
+    hashed_password = hashed_password.split(HASH_SPLIT)[-1]
+    return hashed_password
 
 
 class RemoteRepoRecieveError(Exception):
@@ -55,17 +68,16 @@ class Client:
             if username_ack == USERNAME_RECIEVE_FAIL:
                 raise RemoteRepoRecieveError
 
+            self._sock.send(SALT_REQUEST.encode())
+            hash_salt = self._sock.recv(BUFFER_SIZE)
             password = getpass.getpass("Enter password (hidden input): ")
-            self._sock.send(password.encode())
-            password_ack = self._sock.recv(BUFFER_SIZE).decode()
-            if password_ack == PASSWORD_RECIEVE_FAIL:
-                raise RemoteRepoRecieveError
+            self._sock.send(hash_password(password, hash_salt).encode())
 
-            self._sock.send(AUTH_REQUEST.encode())
-            auth_ack = self._sock.recv(BUFFER_SIZE).decode()
-            if auth_ack == AUTH_SUCCESS:
+            password_ack = self._sock.recv(BUFFER_SIZE).decode()
+            if password_ack == AUTH_SUCCESS:
                 return True
-            elif auth_ack == FALSE_REQUEST:
+
+            elif password_ack == PASSWORD_RECIEVE_FAIL:
                 raise RemoteRepoRecieveError
 
         except RemoteRepoRecieveError as e:
@@ -104,3 +116,11 @@ class Client:
 
         except RemoteRepoRecieveError as e:
             print(e)
+
+
+def main():
+    print(hash_password("123", b"pOIVsmmmmKWjUpvhxAAoUc"))
+
+
+if __name__ == '__main__':
+    main()
