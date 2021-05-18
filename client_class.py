@@ -1,53 +1,19 @@
 import socket
 import getpass
 from passlib.hash import pbkdf2_sha256
-
-# consts:
-
-HASH_ITERATIONS = 260000
-HASH_SPLIT = '$'
-
-# Socket consts:
-
-IP = "127.0.0.1"
-PORT = 10000
-BUFFER_SIZE = 4096
-
-# Codes:
-
-FALSE_REQUEST = "-1"
-AUTH_REQUEST = "authreq"
-PUSH_CODE = "push"
-FILE_NAME_RECIEVE_SUCCESS = "RFNS"  # Recieved file name success.
-FILE_NAME_RECIEVE_FAIL= "RFNF"  # Recieved file name fail.
-FILE_RECIEVE_SUCCESS = "RFS"  # Recived file succesfully.
-FILE_RECIEVE_FAIL = "RFF"  # Recieving file failed.
-OPCODE_RECIEVE_SUCCESS = "ROS"  # Recieved opcode successfully
-OPCODE_RECIEVE_FAIL = "ROF"  # Recieving opcode failed.
-AUTH_SUCCESS = "AS"  # Auth success
-REPO_ID_RECIEVE_SUCCESS = "RRIS"  # Recieving repository ID success.
-REPO_ID_RECIEVE_FAIL = "RRIF"  # Recieving repository ID failed.
-PASSWORD_RECIEVE_FAIL = "RPF"  # Recieving password failed.
-PASSWORD_RECIEVE_SUCCESS = "RPS"  # Recieved password succesfully.
-USERNAME_RECIEVE_SUCCESS = "URS"  # Username recieved succefully.
-USERNAME_RECIEVE_FAIL = "URF"  # Username recieving failed.
-SALT_REQUEST = "SR"
-
-
-def hash_password(password, hash_salt):
-    hashed_password = pbkdf2_sha256.hash(password, rounds=HASH_ITERATIONS, salt=hash_salt)
-    hashed_password = hashed_password.split(HASH_SPLIT)[-1]
-    return hashed_password
-
-
-class RemoteRepoRecieveError(Exception):
-    def __str__(self):
-        return "the passed content wasnt recieved on the other end."
+from custom_exceptions import *
+from consts import *
 
 
 class Client:
     def __init__(self):
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    @staticmethod
+    def hash_password(password, hash_salt):
+        hashed_password = pbkdf2_sha256.hash(password, rounds=HASH_ITERATIONS, salt=hash_salt)
+        hashed_password = hashed_password.split(HASH_SPLIT)[-1]
+        return hashed_password
 
     def start_client(self):
         """
@@ -71,13 +37,13 @@ class Client:
             self._sock.send(SALT_REQUEST.encode())
             hash_salt = self._sock.recv(BUFFER_SIZE)
             password = getpass.getpass("Enter password (hidden input): ")
-            self._sock.send(hash_password(password, hash_salt).encode())
+            self._sock.send(self.hash_password(password, hash_salt).encode())
 
             password_ack = self._sock.recv(BUFFER_SIZE).decode()
             if password_ack == AUTH_SUCCESS:
                 return True
 
-            elif password_ack == PASSWORD_RECIEVE_FAIL:
+            elif password_ack == FALSE_REQUEST:
                 raise RemoteRepoRecieveError
 
         except RemoteRepoRecieveError as e:
@@ -100,7 +66,7 @@ class Client:
             self._sock.send(str(remote_repo_id).encode())
             repo_id_ack = self._sock.recv(BUFFER_SIZE).decode()
             if repo_id_ack == REPO_ID_RECIEVE_FAIL:
-                raise RemoteRepoRecieveError
+                raise RepoDoesntBelongToAccountError
 
             self._sock.send(file_name.encode())
             file_name_ack = self._sock.recv(BUFFER_SIZE).decode()
@@ -114,13 +80,5 @@ class Client:
             if ack_code == FILE_RECIEVE_FAIL:
                 raise RemoteRepoRecieveError
 
-        except RemoteRepoRecieveError as e:
+        except Exception as e:
             print(e)
-
-
-def main():
-    print(hash_password("123", b"pOIVsmmmmKWjUpvhxAAoUc"))
-
-
-if __name__ == '__main__':
-    main()
