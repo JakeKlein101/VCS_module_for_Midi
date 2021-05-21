@@ -64,7 +64,11 @@ def set_remote_commit(commit_num):
         json.dump(conf_content, conf_file)
 
 
-def update_versioned_files_list(new_list):
+def update_versioned_files_list(new_list): # TODO: Add to project summary.
+    """
+    Sets the versioned file name list field as a new list that was passed as an argument.
+    :param new_list: The new list that will be set in the versioned_file_names field.
+    """
     with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
         conf_content = json.load(conf_file)
 
