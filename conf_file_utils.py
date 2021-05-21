@@ -64,7 +64,7 @@ def set_remote_commit(commit_num):
         json.dump(conf_content, conf_file)
 
 
-def update_versioned_files_list(new_list): # TODO: Add to project summary.
+def update_versioned_files_list(new_list):  # TODO: Add to project summary.
     """
     Sets the versioned file name list field as a new list that was passed as an argument.
     :param new_list: The new list that will be set in the versioned_file_names field.
