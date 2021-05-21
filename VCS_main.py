@@ -158,6 +158,40 @@ def set_remote_commit(commit_num):
 
 # Argument handlers:
 
+
+def handle_init():
+    """
+    Handles the init opcode. Firstly, it will created a hidden directory named ".gitbit" in the directory that the CMD
+    window was opened in. then it will create a JSON file with all the fields needed and will set defaults for them.
+    """
+    global REPO_PATH
+    global COMMIT
+
+    conf_json = {}
+    REPO_PATH = os.path.join(os.getcwd(), ".gitbit")
+
+    if not os.path.exists(REPO_PATH):
+        os.mkdir(REPO_PATH)
+        ctypes.windll.kernel32.SetFileAttributesW(REPO_PATH, FILE_ATTRIBUTE_HIDDEN)  # Creates a hidden directory.
+
+        conf_json["repo_path"] = REPO_PATH
+        conf_json["commit_count"] = COMMIT
+        conf_json["versioned_file_names"] = find_midi_files()
+        conf_json["remote_auth"] = False
+        conf_json["remote_repo_id"] = -1
+        conf_json["remote_commit"] = -1
+
+        with open(os.path.join(REPO_PATH, "conf.json"), "w") as conf_file:
+            json.dump(conf_json, conf_file)
+        print("Repository created successfully.")
+    else:
+        print("There is already a repository in this working directory.")
+
+
+def handle_add():
+    pass
+
+
 def handle_commit():
     """
     Handles the commit opcode. Firstly, it will check if there are 5 commits and will call the helper function
@@ -192,54 +226,6 @@ def handle_commit():
         modify_commit_counter(1)  # Updates the configuration file with changes.
     else:
         print("No repository found.")
-
-
-def handle_init():
-    """
-    Handles the init opcode. Firstly, it will created a hidden directory named ".gitbit" in the directory that the CMD
-    window was opened in. then it will create a JSON file with all the fields needed and will set defaults for them.
-    """
-    global REPO_PATH
-    global COMMIT
-
-    conf_json = {}
-    REPO_PATH = os.path.join(os.getcwd(), ".gitbit")
-
-    if not os.path.exists(REPO_PATH):
-        os.mkdir(REPO_PATH)
-        ctypes.windll.kernel32.SetFileAttributesW(REPO_PATH, FILE_ATTRIBUTE_HIDDEN)  # Creates a hidden directory.
-
-        conf_json["repo_path"] = REPO_PATH
-        conf_json["commit_count"] = COMMIT
-        conf_json["versioned_file_names"] = find_midi_files()
-        conf_json["remote_auth"] = False
-        conf_json["remote_repo_id"] = -1
-        conf_json["remote_commit"] = -1
-
-        with open(os.path.join(REPO_PATH, "conf.json"), "w") as conf_file:
-            json.dump(conf_json, conf_file)
-        print("Repository created successfully.")
-    else:
-        print("There is already a repository in this working directory.")
-
-
-def handle_delete():
-    """
-    Handles the delete opcode. Firstly it will ask if the client is sure he wants to delete the repository, if he
-    answers yes, then the hidden ".gitbit" directory will be deleted. If he answered no,
-    then the deletion will be cancelled.
-    """
-    conf_parse()
-    global REPO_PATH
-
-    user_input = input("Are you sure you want to delete the repository? y/n: ").lower()
-    if user_input == "y":
-        shutil.rmtree(REPO_PATH)
-        print("Repo deleted successfully.")
-    elif user_input == "n":
-        print("Regret isnt always a bad thing :)")
-    elif user_input != "y" or user_input != "n":
-        print("Enter a valid letter.")
 
 
 def handle_push():
@@ -292,3 +278,30 @@ def handle_push():
             print("The latest commit was already pushed.")
     else:
         print("No commmits to push.")
+
+
+def handle_rollback():
+    pass
+
+
+def handle_delete():
+    """
+    Handles the delete opcode. Firstly it will ask if the client is sure he wants to delete the repository, if he
+    answers yes, then the hidden ".gitbit" directory will be deleted. If he answered no,
+    then the deletion will be cancelled.
+    """
+    conf_parse()
+    global REPO_PATH
+
+    user_input = input("Are you sure you want to delete the repository? y/n: ").lower()
+    if user_input == "y":
+        shutil.rmtree(REPO_PATH)
+        print("Repo deleted successfully.")
+    elif user_input == "n":
+        print("Regret isnt always a bad thing :)")
+    elif user_input != "y" or user_input != "n":
+        print("Enter a valid letter.")
+
+
+def handle_status():
+    pass

@@ -16,6 +16,12 @@ def main():
         VCS_main.handle_delete()
     elif args.opcode == "push":
         VCS_main.handle_push()
+    elif args.opcode == "add":
+        VCS_main.handle_add()
+    elif args.opcode == "rollback":
+        VCS_main.handle_rollback()  # TODO: Add optional arguments.
+    elif args.opcode == "status":
+        VCS_main.handle_status()
     else:
         print(f"{args.opcode} is not a legal command.")
 
