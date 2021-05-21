@@ -4,6 +4,7 @@ import argparse
 parser = argparse.ArgumentParser(description="Parser for gitbit VCS commands.")
 parser.add_argument("opcode", type=str, help="Choose an opcode that suits the wanted operation."
                                              " for example: commit, push, init.")
+parser.add_argument("-o", "--opcode_args", type=str, help="Optional arguments for certian functions.")
 
 
 def main():
@@ -17,7 +18,7 @@ def main():
     elif args.opcode == "push":
         VCS_main.handle_push()
     elif args.opcode == "add":
-        VCS_main.handle_add()
+        VCS_main.handle_add(args.opcode_args)
     elif args.opcode == "rollback":
         VCS_main.handle_rollback()  # TODO: Add optional arguments.
     elif args.opcode == "status":

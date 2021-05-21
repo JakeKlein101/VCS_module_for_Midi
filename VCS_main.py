@@ -3,7 +3,9 @@ import ctypes
 import json
 import shutil
 import diff_module
+from clint.textui import colored
 import client_class
+import conf_file_utils  # TODO: Add to project summary.
 
 # consts:
 
@@ -72,8 +74,6 @@ def delete_fifth_last():
     shutil.rmtree(path_to_delete)
 
 
-# Configuration file modfication methods:
-
 def conf_parse():
     """
     Used on all occasitons except init. Used to open the configuration file and set up the needed data
@@ -95,67 +95,6 @@ def conf_parse():
         REMOTE_REPO_ID = conf_content["remote_repo_id"]
         REMOTE_COMMIT = conf_content["remote_commit"]
 
-
-def update_remote_auth_status(bool_arg):
-    """
-    Changes the REMOTE_AUTH status to True after a succesfull authorization with the remote repo.
-    """
-    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
-        conf_content = json.load(conf_file)
-
-        # The changes to the configuration file are done here:
-        conf_content["remote_auth"] = bool_arg
-
-    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "w") as conf_file:
-        json.dump(conf_content, conf_file)
-
-
-def modify_commit_counter(num):
-    """
-    Updates the commit_counter by an amount that is passed in the num argument.
-    :param num: the amount to add to the commit counter(can be negative to decrease the commit counter).
-    """
-    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
-        conf_content = json.load(conf_file)
-
-        # The changes to the configuration file are done here:
-        conf_content["commit_count"] += num
-
-    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "w") as conf_file:
-        json.dump(conf_content, conf_file)
-
-
-def set_repo_id(repo_id):
-    """
-    Sets the remote repository id as the argument given.
-    The user has to input the ID only once, and then it will be automatically pulled from the conf.json file.
-    :param repo_id: The id of the remote repository.
-    """
-    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
-        conf_content = json.load(conf_file)
-
-        # The changes to the configuration file are done here:
-        conf_content["remote_repo_id"] = repo_id
-
-    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "w") as conf_file:
-        json.dump(conf_content, conf_file)
-
-
-def set_remote_commit(commit_num):
-    """
-    Sets the remote_commit as the argument given.
-    :param commit_num: The number of the latest commit that was pushed.
-    """
-    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "r") as conf_file:
-        conf_content = json.load(conf_file)
-
-        # The changes to the configuration file are done here:
-        conf_content["remote_commit"] = commit_num
-
-    with open(os.path.join(os.getcwd(), ".gitbit", "conf.json"), "w") as conf_file:
-        json.dump(conf_content, conf_file)
-
-
 # Argument handlers:
 
 
@@ -176,7 +115,7 @@ def handle_init():
 
         conf_json["repo_path"] = REPO_PATH
         conf_json["commit_count"] = COMMIT
-        conf_json["versioned_file_names"] = find_midi_files()
+        conf_json["versioned_file_names"] = []
         conf_json["remote_auth"] = False
         conf_json["remote_repo_id"] = -1
         conf_json["remote_commit"] = -1
@@ -188,8 +127,17 @@ def handle_init():
         print("There is already a repository in this working directory.")
 
 
-def handle_add():
-    pass
+def handle_add(filename):  # TODO: Add to Project summary.
+    global VERSIONED_FILE_NAMES
+    conf_parse()
+
+    if filename in find_midi_files():
+        VERSIONED_FILE_NAMES.append(filename)
+        print(f"{filename} added to version control.")
+        conf_file_utils.update_versioned_files_list(VERSIONED_FILE_NAMES)
+
+    else:
+        print(f"There is no file named {filename} in working directory.")
 
 
 def handle_commit():
@@ -199,33 +147,37 @@ def handle_commit():
     to the created dir. If there is more than one commit, it will get the paths to the latest and second latest MIDI
     files that were committed, and will call the main_diff method in diff_module.py.
     """
-    conf_parse()  # Extracts the data from the configuration file into global variables before operation.
     global REPO_PATH
     global COMMIT
+    global VERSIONED_FILE_NAMES
+    conf_parse()  # Extracts the data from the configuration file into global variables before operation.
 
-    if os.path.exists(REPO_PATH):
-        if COMMIT >= 5:
-            delete_fifth_last()
+    if VERSIONED_FILE_NAMES:
+        if os.path.exists(REPO_PATH):
+            if COMMIT >= 5:
+                delete_fifth_last()
 
-        os.mkdir(os.path.join(REPO_PATH, "commit " + str(COMMIT)))
-        copy_midi_file_to_commit_dir()
+            os.mkdir(os.path.join(REPO_PATH, "commit " + str(COMMIT)))
+            copy_midi_file_to_commit_dir()  # TODO: Make it work with multiple MIDI files.
 
-        if COMMIT > 0:  # The files will only be sent to be checked for diff after more than 1 commit.
-            latest_file_path, second_to_last_file_path = get_paths_of_files_to_compare()
-            return_code = diff_module.main_diff(latest_file_path, second_to_last_file_path)
-            if return_code == 0:
-                print("No changes were made.")
-                shutil.rmtree(os.path.join(REPO_PATH, "commit " + str(COMMIT)))
-                modify_commit_counter(-1)
+            if COMMIT > 0:  # The files will only be sent to be checked for diff after more than 1 commit.
+                latest_file_path, second_to_last_file_path = get_paths_of_files_to_compare()
+                return_code = diff_module.main_diff(latest_file_path, second_to_last_file_path)
+                if return_code == 0:
+                    print("No changes were made.")
+                    shutil.rmtree(os.path.join(REPO_PATH, "commit " + str(COMMIT)))
+                    conf_file_utils.modify_commit_counter(-1)
+                else:
+                    print("Committed succesfully.")
             else:
                 print("Committed succesfully.")
-        else:
-            print("Committed succesfully.")
 
-        COMMIT += 1
-        modify_commit_counter(1)  # Updates the configuration file with changes.
+            COMMIT += 1
+            conf_file_utils.modify_commit_counter(1)  # Updates the configuration file with changes.
+        else:
+            print("No repository found.")
     else:
-        print("No repository found.")
+        print("No MIDI files added to repository.")
 
 
 def handle_push():
@@ -253,26 +205,26 @@ def handle_push():
             if not REMOTE_AUTH:
                 if client.auth_user():
                     print("Connection authorized")
-                    update_remote_auth_status(True)
+                    conf_file_utils.update_remote_auth_status(True)
                 else:
                     return
 
             if int(REMOTE_REPO_ID) > -1:
                 if client.push_to_remote(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID):
-                    set_remote_commit(COMMIT)
+                    conf_file_utils.set_remote_commit(COMMIT)
                     print("Pushed commits successfully.")
                 else:
-                    update_remote_auth_status(False)
+                    conf_file_utils.update_remote_auth_status(False)
 
             else:
                 REMOTE_REPO_ID = input("Enter a repository ID: ")
-                set_repo_id(REMOTE_REPO_ID)
+                conf_file_utils.set_repo_id(REMOTE_REPO_ID)
                 if client.push_to_remote(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID):
-                    set_remote_commit(COMMIT)
+                    conf_file_utils.set_remote_commit(COMMIT)
                     print("Pushed commits successfully.")
                 else:
-                    update_remote_auth_status(False)
-                    set_repo_id(-1)
+                    conf_file_utils.update_remote_auth_status(False)
+                    conf_file_utils.set_repo_id(-1)
 
         elif COMMIT == REMOTE_COMMIT:
             print("The latest commit was already pushed.")
@@ -280,7 +232,7 @@ def handle_push():
         print("No commmits to push.")
 
 
-def handle_rollback():
+def handle_rollback():  # TODO: Add to Project summary.
     pass
 
 
@@ -303,5 +255,24 @@ def handle_delete():
         print("Enter a valid letter.")
 
 
-def handle_status():
-    pass
+def handle_status():  # TODO: Add to Project summary.
+    global REMOTE_AUTH
+    global VERSIONED_FILE_NAMES
+    global COMMIT
+    global REMOTE_REPO_ID
+    global REMOTE_COMMIT
+    conf_parse()
+
+    print("\nStatus report for gitbit repository. If a field is equal to -1, "
+          "it means that it wasnt affected since init.")
+    print(f"Authorization with the server: {REMOTE_AUTH}")
+
+    print("\nMIDI files in the working directory:\n")
+    for filename in find_midi_files():
+        if filename in VERSIONED_FILE_NAMES:
+            print(colored.green(f"    -{filename}"))
+        else:
+            print(colored.red(f"    -{filename}"))
+
+    print(f"\nTotal number of commits: {COMMIT}")
+    print(f"Last commit pushed: {REMOTE_COMMIT}")
