@@ -232,6 +232,10 @@ def handle_push():
         print("No commmits to push.")
 
 
+def handle_pull():
+    pass
+
+
 def handle_rollback(rollback_amount):  # TODO: Add to Project summary.
     pass
 
@@ -284,6 +288,7 @@ def handle_preview(filename):  # TODO: Add to Project summary.
 
     if filename in find_midi_files():
         print("CTRL+C to stop preview.")
+        # mixer config
         freq = 44100  # audio CD quality
         bitsize = -16  # unsigned 16 bit
         channels = 2  # 1 is mono, 2 is stereo
@@ -295,7 +300,6 @@ def handle_preview(filename):  # TODO: Add to Project summary.
 
         # listen for interruptions
         try:
-            # use the midi file you just saved
             clock = pygame.time.Clock()
             pygame.mixer.music.load(filename)
             pygame.mixer.music.play()

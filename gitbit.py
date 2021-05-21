@@ -17,6 +17,8 @@ def main():
         VCS_main.handle_delete()
     elif args.opcode == "push":
         VCS_main.handle_push()
+    elif args.opcode == "pull":
+        VCS_main.handle_pull()
     elif args.opcode == "add":
         VCS_main.handle_add(args.opcode_args)
     elif args.opcode == "rollback":
