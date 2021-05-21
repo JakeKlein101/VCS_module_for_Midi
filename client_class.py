@@ -17,9 +17,15 @@ class Client:
 
     def start_client(self):
         """
-        Connects the socket to the server socket.
+        Connects the socket to the server socket. Returns True if operation successful, otherwise False.
         """
-        self._sock.connect((IP, PORT))
+        try:
+            self._sock.connect((IP, PORT))
+            return True
+
+        except ConnectionRefusedError as e:
+            print("Server isn't running.")
+            return False
 
     def auth_user(self):
         """

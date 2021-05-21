@@ -1,11 +1,12 @@
 import os
-import ctypes
 import json
+import ctypes
 import shutil
 import diff_module
-from clint.textui import colored
 import client_class
 import conf_file_utils  # TODO: Add to project summary.
+from clint.textui import colored
+
 
 # consts:
 
@@ -200,31 +201,30 @@ def handle_push():
     if COMMIT >= 1:
         if COMMIT > REMOTE_COMMIT:
             client = client_class.Client()
-            client.start_client()
+            if client.start_client():
+                if not REMOTE_AUTH:
+                    if client.auth_user():
+                        print("Connection authorized")
+                        conf_file_utils.update_remote_auth_status(True)
+                    else:
+                        return
 
-            if not REMOTE_AUTH:
-                if client.auth_user():
-                    print("Connection authorized")
-                    conf_file_utils.update_remote_auth_status(True)
-                else:
-                    return
+                if int(REMOTE_REPO_ID) > -1:
+                    if client.push_to_remote(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID):
+                        conf_file_utils.set_remote_commit(COMMIT)
+                        print("Pushed commits successfully.")
+                    else:
+                        conf_file_utils.update_remote_auth_status(False)
 
-            if int(REMOTE_REPO_ID) > -1:
-                if client.push_to_remote(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID):
-                    conf_file_utils.set_remote_commit(COMMIT)
-                    print("Pushed commits successfully.")
                 else:
-                    conf_file_utils.update_remote_auth_status(False)
-
-            else:
-                REMOTE_REPO_ID = input("Enter a repository ID: ")
-                conf_file_utils.set_repo_id(REMOTE_REPO_ID)
-                if client.push_to_remote(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID):
-                    conf_file_utils.set_remote_commit(COMMIT)
-                    print("Pushed commits successfully.")
-                else:
-                    conf_file_utils.update_remote_auth_status(False)
-                    conf_file_utils.set_repo_id(-1)
+                    REMOTE_REPO_ID = input("Enter a repository ID: ")
+                    conf_file_utils.set_repo_id(REMOTE_REPO_ID)
+                    if client.push_to_remote(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID):
+                        conf_file_utils.set_remote_commit(COMMIT)
+                        print("Pushed commits successfully.")
+                    else:
+                        conf_file_utils.update_remote_auth_status(False)
+                        conf_file_utils.set_repo_id(-1)
 
         elif COMMIT == REMOTE_COMMIT:
             print("The latest commit was already pushed.")
@@ -232,7 +232,7 @@ def handle_push():
         print("No commmits to push.")
 
 
-def handle_rollback():  # TODO: Add to Project summary.
+def handle_rollback(rollback_amount):  # TODO: Add to Project summary.
     pass
 
 
@@ -276,3 +276,36 @@ def handle_status():  # TODO: Add to Project summary.
 
     print(f"\nTotal number of commits: {COMMIT}")
     print(f"Last commit pushed: {REMOTE_COMMIT}")
+
+
+def handle_preview(filename):  # TODO: Add to Project summary.
+    os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+    import pygame
+
+    if filename in find_midi_files():
+        print("CTRL+C to stop preview.")
+        freq = 44100  # audio CD quality
+        bitsize = -16  # unsigned 16 bit
+        channels = 2  # 1 is mono, 2 is stereo
+        buffer = 1024  # number of samples
+        pygame.mixer.init(freq, bitsize, channels, buffer)
+
+        # optional volume 0 to 1.0
+        pygame.mixer.music.set_volume(0.8)
+
+        # listen for interruptions
+        try:
+            # use the midi file you just saved
+            clock = pygame.time.Clock()
+            pygame.mixer.music.load(filename)
+            pygame.mixer.music.play()
+            while pygame.mixer.music.get_busy():
+                clock.tick(30)  # check if playback has finished
+        except KeyboardInterrupt:
+            # if user hits Ctrl/C then exit
+            # (works only in console mode)
+            pygame.mixer.music.fadeout(1000)
+            pygame.mixer.music.stop()
+            raise SystemExit
+    else:
+        print(f"The file {filename} doesn't exist in the current working directory.")
