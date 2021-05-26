@@ -27,6 +27,9 @@ class Client:
             print("Server isn't running.")
             return False
 
+    def clone_repository(self):
+        pass
+
     def auth_user(self):
         """
         Handles the authentication with the server. Firstly, it will send the opcode, then
@@ -76,7 +79,7 @@ class Client:
         :param remote_repo_id: The id of the remote repo were pushing to.
         """
         try:
-            self._sock.send(PUSH_CODE.encode())
+            self._sock.send(PUSH_REQUEST.encode())
             opcode_ack = self._sock.recv(BUFFER_SIZE).decode()
             if opcode_ack == OPCODE_RECIEVE_FAIL:
                 raise RemoteRepoRecieveError

@@ -13,7 +13,8 @@ BUFFER_SIZE = 4096
 
 FALSE_REQUEST = "-1"
 AUTH_REQUEST = "authreq"
-PUSH_CODE = "push"
+PUSH_REQUEST = "push"
+CLONE_REQUEST = "clone"
 FILE_NAME_RECIEVE_SUCCESS = "RFNS"  # Recieved file name success.
 FILE_NAME_RECIEVE_FAIL= "RFNF"  # Recieved file name fail.
 FILE_RECIEVE_SUCCESS = "RFS"  # Recived file succesfully.

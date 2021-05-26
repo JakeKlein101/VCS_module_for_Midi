@@ -128,6 +128,22 @@ def handle_init():
         print("There is already a repository in this working directory.")
 
 
+def handle_clone():
+    global REMOTE_AUTH
+    conf_parse()
+    client = client_class.Client()
+    client.start_client()
+
+    if not REMOTE_AUTH:
+        if client.auth_user():
+            print("Connection authorized")
+            conf_file_utils.update_remote_auth_status(True)
+        else:
+            return
+
+    client.clone_repository()
+
+
 def handle_add(filename):  # TODO: Add to Project summary.
     global VERSIONED_FILE_NAMES
     conf_parse()
