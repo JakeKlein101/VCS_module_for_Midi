@@ -1,5 +1,6 @@
 import socket
 import getpass
+import os
 from passlib.hash import pbkdf2_sha256
 from custom_exceptions import *
 from consts import *
@@ -67,7 +68,7 @@ class Client:
         except Exception as e:
             print(e)
 
-    def clone_repository(self, remote_repo_id):
+    def clone_repository(self, remote_repo_id):  # TODO: Add to Project summary.
         try:
             self._sock.send(CLONE_REQUEST.encode())
             opcode_ack = self._sock.recv(BUFFER_SIZE).decode()
@@ -78,6 +79,17 @@ class Client:
             repo_id_ack = self._sock.recv(BUFFER_SIZE).decode()
             if repo_id_ack == REPO_ID_FAIL:
                 raise RepoDoesntBelongToAccountError
+
+            self._sock.send(FILE_NAME_REQUEST.encode())
+            file_name = self._sock.recv(BUFFER_SIZE).decode()
+
+            if file_name == FILE_NOT_FOUND:
+                raise FileNotFoundInRemoteRepoError
+            self._sock.send(FILE_NAME_RECIEVE_SUCCESS.encode())
+
+            file_content = self._sock.recv(BUFFER_SIZE)
+            with open(os.path.join(os.getcwd(), file_name), 'wb') as file:
+                file.write(file_content)
 
         except Exception as e:
             print(e)

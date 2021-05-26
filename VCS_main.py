@@ -145,8 +145,12 @@ def handle_clone():  # TODO: Add to Project summary.
                 return
 
         remote_repo_id = input("Enter a repository id: ")
-        client.clone_repository(remote_repo_id)
-        conf_file_utils.set_repo_id(remote_repo_id)
+
+        if client.clone_repository(remote_repo_id):
+            conf_file_utils.set_repo_id(remote_repo_id)
+            print(f"The remote repository with the id of {remote_repo_id} was cloned successfully.")
+        else:
+            conf_file_utils.update_remote_auth_status(False)
     else:
         print("Can't clone a remote repository to a local repository that is not empty.")
 
@@ -295,11 +299,16 @@ def handle_status():  # TODO: Add to Project summary.
     print(f"Authorization with the server: {REMOTE_AUTH}")
 
     print("\nMIDI files in the working directory:\n")
-    for filename in find_midi_files():
-        if filename in VERSIONED_FILE_NAMES:
-            print(colored.green(f"    -{filename}"))
-        else:
-            print(colored.red(f"    -{filename}"))
+
+    midi_files_list = find_midi_files()
+    if midi_files_list:
+        for filename in midi_files_list:
+            if filename in VERSIONED_FILE_NAMES:
+                print(colored.green(f"    -{filename}"))
+            else:
+                print(colored.red(f"    -{filename}"))
+    else:
+        print(colored.red("No MIDI files in this directory."))
 
     print(f"\nTotal number of commits: {COMMIT}")
     print(f"Last commit pushed: {REMOTE_COMMIT}")
