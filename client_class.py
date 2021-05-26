@@ -27,9 +27,6 @@ class Client:
             print("Server isn't running.")
             return False
 
-    def clone_repository(self):
-        pass
-
     def auth_user(self):
         """
         Handles the authentication with the server. Firstly, it will send the opcode, then
@@ -69,6 +66,24 @@ class Client:
 
         except Exception as e:
             print(e)
+
+    def clone_repository(self, remote_repo_id):
+        try:
+            self._sock.send(CLONE_REQUEST.encode())
+            opcode_ack = self._sock.recv(BUFFER_SIZE).decode()
+            if opcode_ack == OPCODE_RECIEVE_FAIL:
+                raise RemoteRepoRecieveError
+
+            self._sock.send(str(remote_repo_id).encode())
+            repo_id_ack = self._sock.recv(BUFFER_SIZE).decode()
+            if repo_id_ack == REPO_ID_FAIL:
+                raise RepoDoesntBelongToAccountError
+
+        except Exception as e:
+            print(e)
+            return False
+        else:
+            return True
 
     def push_to_remote(self, file_name, remote_repo_id):
         """

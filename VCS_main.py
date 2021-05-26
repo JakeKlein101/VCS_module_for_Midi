@@ -128,20 +128,27 @@ def handle_init():
         print("There is already a repository in this working directory.")
 
 
-def handle_clone():
+def handle_clone():  # TODO: Add to Project summary.
     global REMOTE_AUTH
+    global COMMIT
+
     conf_parse()
-    client = client_class.Client()
-    client.start_client()
+    if COMMIT == 0:
+        client = client_class.Client()
+        client.start_client()
 
-    if not REMOTE_AUTH:
-        if client.auth_user():
-            print("Connection authorized")
-            conf_file_utils.update_remote_auth_status(True)
-        else:
-            return
+        if not REMOTE_AUTH:
+            if client.auth_user():
+                print("Connection authorized")
+                conf_file_utils.update_remote_auth_status(True)
+            else:
+                return
 
-    client.clone_repository()
+        remote_repo_id = input("Enter a repository id: ")
+        client.clone_repository(remote_repo_id)
+        conf_file_utils.set_repo_id(remote_repo_id)
+    else:
+        print("Can't clone a remote repository to a local repository that is not empty.")
 
 
 def handle_add(filename):  # TODO: Add to Project summary.
@@ -248,7 +255,7 @@ def handle_push():
         print("No commmits to push.")
 
 
-def handle_pull():
+def handle_pull():  # TODO: Add to Project summary.
     pass
 
 
