@@ -93,9 +93,9 @@ class Client:
 
         except Exception as e:
             print(e)
-            return False
+            return False, file_name
         else:
-            return True
+            return True, file_name
 
     def push_to_remote(self, file_name, remote_repo_id):
         """

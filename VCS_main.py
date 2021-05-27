@@ -137,20 +137,13 @@ def handle_clone():  # TODO: Add to Project summary.
         client = client_class.Client()
         client.start_client()
 
-        if not REMOTE_AUTH:
-            if client.auth_user():
-                print("Connection authorized")
-                conf_file_utils.update_remote_auth_status(True)
-            else:
-                return
-
         remote_repo_id = input("Enter a repository id: ")
 
-        if client.clone_repository(remote_repo_id):
+        status, file_name = client.clone_repository(remote_repo_id)
+        if status:
             conf_file_utils.set_repo_id(remote_repo_id)
             print(f"The remote repository with the id of {remote_repo_id} was cloned successfully.")
-        else:
-            conf_file_utils.update_remote_auth_status(False)
+            handle_add(file_name)
     else:
         print("Can't clone a remote repository to a local repository that is not empty.")
 
