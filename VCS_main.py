@@ -4,7 +4,7 @@ import ctypes
 import shutil
 import diff_module
 import client_class
-import conf_file_utils  # TODO: Add to project summary.
+import conf_file_utils
 from clint.textui import colored
 
 
@@ -253,10 +253,6 @@ def handle_push():
 
 
 def handle_pull():  # TODO: Add to Project summary.
-    pass
-
-
-def handle_rollback(rollback_amount):  # TODO: Add to Project summary.
     pass
 
 

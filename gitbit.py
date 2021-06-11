@@ -23,8 +23,6 @@ def main():
         VCS_main.handle_clone()
     elif args.opcode == "add":
         VCS_main.handle_add(args.opcode_args)
-    elif args.opcode == "rollback":
-        VCS_main.handle_rollback(args.opcode_args)
     elif args.opcode == "preview":
         VCS_main.handle_preview(args.opcode_args)
     elif args.opcode == "status":
