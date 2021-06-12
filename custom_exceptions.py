@@ -13,7 +13,7 @@ class UserNotFoundError(Exception):
         return "There is no account with this username."
 
 
-class FileNotFoundInRemoteRepoError(Exception):  # TODO: Add to Project summary.
+class FileNotFoundInRemoteRepoError(Exception):
     def __str__(self):
         return "The needed files were not found in the remote repository database."
 

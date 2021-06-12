@@ -128,7 +128,7 @@ def handle_init():
         print("There is already a repository in this working directory.")
 
 
-def handle_clone():  # TODO: Add to Project summary.
+def handle_clone():
     global REMOTE_AUTH
     global COMMIT
 
@@ -148,7 +148,7 @@ def handle_clone():  # TODO: Add to Project summary.
         print("Can't clone a remote repository to a local repository that is not empty.")
 
 
-def handle_add(filename):  # TODO: Add to Project summary.
+def handle_add(filename):
     global VERSIONED_FILE_NAMES
     conf_parse()
 
@@ -275,7 +275,7 @@ def handle_delete():
         print("Enter a valid letter.")
 
 
-def handle_status():  # TODO: Add to Project summary.
+def handle_status():
     global REMOTE_AUTH
     global VERSIONED_FILE_NAMES
     global COMMIT
@@ -303,7 +303,7 @@ def handle_status():  # TODO: Add to Project summary.
     print(f"Last commit pushed: {REMOTE_COMMIT}")
 
 
-def handle_preview(filename):  # TODO: Add to Project summary.
+def handle_preview(filename):
     os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
     import pygame
 

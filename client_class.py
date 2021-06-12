@@ -68,7 +68,7 @@ class Client:
         except Exception as e:
             print(e)
 
-    def clone_repository(self, remote_repo_id):  # TODO: Add to Project summary.
+    def clone_repository(self, remote_repo_id):
         try:
             self._sock.send(CLONE_REQUEST.encode())
             opcode_ack = self._sock.recv(BUFFER_SIZE).decode()
