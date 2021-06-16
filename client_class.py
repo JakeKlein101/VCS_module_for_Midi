@@ -133,3 +133,27 @@ class Client:
             return False
         else:
             return True
+
+    def pull(self, file_name, remote_repo_id):
+        try:
+            self._sock.send(PULL_REQUEST.encode())
+            opcode_ack = self._sock.recv(BUFFER_SIZE).decode()
+            if opcode_ack == OPCODE_RECIEVE_FAIL:
+                raise RemoteRepoRecieveError
+
+            self._sock.send(str(remote_repo_id).encode())
+            repo_id_ack = self._sock.recv(BUFFER_SIZE).decode()
+            if repo_id_ack == REPO_ID_FAIL:
+                raise RepoDoesntBelongToAccountError
+
+            self._sock.send(FILE_REQUEST.encode())
+            file_content = self._sock.recv(BUFFER_SIZE)
+            with open(os.path.join(os.getcwd(), file_name), 'wb') as file:
+                file.write(file_content)
+                print("pulling")
+
+        except Exception as e:
+            print(e)
+            return False
+        else:
+            return True

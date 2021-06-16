@@ -179,7 +179,7 @@ def handle_commit():
                 delete_fifth_last()
 
             os.mkdir(os.path.join(REPO_PATH, "commit " + str(COMMIT)))
-            copy_midi_file_to_commit_dir()  # TODO: Make it work with multiple MIDI files.
+            copy_midi_file_to_commit_dir()
 
             if COMMIT > 0:  # The files will only be sent to be checked for diff after more than 1 commit.
                 latest_file_path, second_to_last_file_path = get_paths_of_files_to_compare()
@@ -253,7 +253,16 @@ def handle_push():
 
 
 def handle_pull():  # TODO: Add to Project summary.
-    pass
+    global REMOTE_REPO_ID
+    global VERSIONED_FILE_NAMES
+    conf_parse()
+
+    client = client_class.Client()
+    if client.start_client():
+        if client.pull(VERSIONED_FILE_NAMES[0], REMOTE_REPO_ID):
+            print("Pulled successfully.")
+        else:
+            print("Pull failed.")
 
 
 def handle_delete():
