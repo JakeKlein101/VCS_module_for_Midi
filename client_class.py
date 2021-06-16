@@ -135,6 +135,14 @@ class Client:
             return True
 
     def pull(self, file_name, remote_repo_id):
+        """
+        Sends a pull opcode to the server. then sends the repo id and after the sends a request for the file content
+        and then writes it into the file. After each thing that is sent, the client recieves an ACK that confirmes
+        that delivery of the data sent.
+        :param file_name: The name of the file that we send to the remote server.
+        :param remote_repo_id: The id of the remote repo were pulling from.
+        :return: True if pull was successfull, otherwise false.
+        """
         try:
             self._sock.send(PULL_REQUEST.encode())
             opcode_ack = self._sock.recv(BUFFER_SIZE).decode()

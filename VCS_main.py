@@ -252,7 +252,11 @@ def handle_push():
         print("No commmits to push.")
 
 
-def handle_pull():  # TODO: Add to Project summary.
+def handle_pull():
+    """
+    Handles the pull opcode. Creates a new Client object and initiates the pull method in client_class.py with the
+    relevant arguments.
+    """
     global REMOTE_REPO_ID
     global VERSIONED_FILE_NAMES
     conf_parse()
