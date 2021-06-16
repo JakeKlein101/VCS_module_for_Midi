@@ -158,7 +158,6 @@ class Client:
             file_content = self._sock.recv(BUFFER_SIZE)
             with open(os.path.join(os.getcwd(), file_name), 'wb') as file:
                 file.write(file_content)
-                print("pulling")
 
         except Exception as e:
             print(e)
